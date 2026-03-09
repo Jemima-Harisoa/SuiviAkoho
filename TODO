@@ -37,8 +37,8 @@
 - [X] elevage.Race : Races de poulets avec description JSON
 - [X] elevage.PhaseAlimentation : Phases d'alimentation par âge (Starter/Grower/Finisher)
 - [X] elevage.ReferenceCompositionAliment : Composition des aliments (ingrédients et pourcentages)
-- [ ] elevage.Unite : Unités de mesure avec correspondances de conversion (g, kg, pièce, etc)
-- [ ] elevage.Parametre : Valeurs paramétriques immuables avec date d'effet (température incubation, prix marché)
+- [X] elevage.Unite : Unités de mesure avec correspondances de conversion (g, kg, pièce, etc)
+- [X] elevage.Parametre : Valeurs paramétriques immuables avec date d'effet (température incubation, prix marché)
 
 **Tables Métier**
 - [X] elevage.Lot : Entité centrale, un lot de poulets élevés ensemble
@@ -53,10 +53,10 @@
 - [X] elevage.HistoriqueIncubation : Évolution quotidienne des incubations
 
 **Tables de Gestion Commerciale**
-- [ ] elevage.Production : Stock destiné à la vente immédiate (œufs et poules disponibles)
-- [ ] elevage.HistoriqueVente : Ventes effectuées avec CA, bénéfice, réalisation
-- [ ] elevage.Prevision : Planification des dépenses à effectuer (budget prévisionnel)
-- [ ] elevage.HistoriqueAchat : Achats et dépenses réalisés (aliment, médicament, poussins)
+- [X] elevage.Production : Stock destiné à la vente immédiate (œufs et poules disponibles)
+- [X] elevage.HistoriqueVente : Ventes effectuées avec CA, bénéfice, réalisation
+- [X] elevage.Prevision : Planification des dépenses à effectuer (budget prévisionnel)
+- [X] elevage.HistoriqueAchat : Achats et dépenses réalisés (aliment, médicament, poussins)
 
 #### Comprendre les Relations
 
