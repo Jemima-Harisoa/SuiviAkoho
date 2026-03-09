@@ -1,10 +1,10 @@
 # SUIVI D’ÉLEVAGE DE POULETS 
 
-## Principe : 1 lot = 1 race = même âge
+### Principe : 1 lot = 1 race = même âge
 
 ---
 
-# 1. Définition d’un lot
+## 1. Définition d’un lot
 
 Un **lot** correspond à :
 
@@ -18,7 +18,7 @@ Le suivi commence après incubation (21 jours) → **Semaine 0**
 
 ---
 
-# 2. Cycle général d’élevage
+## 2. Cycle général d’élevage
 
 Deux types de production :
 
@@ -36,7 +36,7 @@ Deux types de production :
 
 ---
 
-# 3. Incubation
+## 3. Incubation
 
 * Durée : 21 jours
 * Taux éclosion naturel : 70–80 %
@@ -45,9 +45,9 @@ Deux types de production :
 
 ---
 
-# 4. Suivi hebdomadaire – Poulet chair
+## 4. Suivi hebdomadaire – Poulet chair
 
-## Paramètres à suivre chaque semaine :
+### Paramètres à suivre chaque semaine :
 
 * Nombre restant (mortalité)
 * Poids moyen
@@ -58,7 +58,7 @@ Deux types de production :
 
 ---
 
-## Tableau type de suivi (Exemple N = 100)
+### Tableau type de suivi (Exemple N = 100)
 
 | Semaine | Effectif | Poids moyen (g) | Variation (g) | Ration totale (kg/sem) | Coût alim (Ar) | Valeur lot (Ar)* |
 | ------- | -------- | --------------- | ------------- | ---------------------- | -------------- | ---------------- |
@@ -74,9 +74,9 @@ Deux types de production :
 
 ---
 
-# 5. Rations alimentaires (Madagascar)
+## 5. Rations alimentaires (Madagascar)
 
-## Phases alimentaires
+### Phases alimentaires
 
 | Phase    | Âge     | Ration (g/jour/poulet) | Objectif                 |
 | -------- | ------- | ---------------------- | ------------------------ |
@@ -96,7 +96,7 @@ L’aliment représente environ **60 % du coût total de production**.
 
 ---
 
-# 6. Exemple financier simplifié (Lot 100 poulets chair)
+## 6. Exemple financier simplifié (Lot 100 poulets chair)
 
 Hypothèses :
 
@@ -117,9 +117,9 @@ Bénéfice estimé ≈ 1 050 000 Ar
 
 ---
 
-# 7. Suivi des poules pondeuses
+## 7. Suivi des poules pondeuses
 
-## Paramètres à suivre
+### Paramètres à suivre
 
 * Nombre de poules actives
 * Nombre d’œufs/jour
@@ -129,7 +129,7 @@ Bénéfice estimé ≈ 1 050 000 Ar
 
 ---
 
-## Tableau type suivi ponte (100 poules)
+### Tableau type suivi ponte (100 poules)
 
 | Semaine | Poules actives | Œufs/jour | Œufs/semaine | Taux ponte (%) | Recette hebdo (Ar)* |
 | ------- | -------------- | --------- | ------------ | -------------- | ------------------- |
@@ -141,7 +141,7 @@ Bénéfice estimé ≈ 1 050 000 Ar
 
 ---
 
-# 8. Traitement des œufs
+## 8. Traitement des œufs
 
 Deux possibilités :
 
