@@ -10,7 +10,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ./database:/var/opt/mssql
+      - ./database:/var/opt/mssql #dossier partagé pour les données persistantes
       - ./database/init:/scripts/init
       - ./database/entrypoint.sh:/entrypoint.sh
     entrypoint: ["/bin/bash", "-c", "/entrypoint.sh & /opt/mssql/bin/sqlservr"]

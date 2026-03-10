@@ -1,3 +1,13 @@
+# fichier volumineux database
 database/.*
 database/log/*
 database/secrets/*
+
+# fichier volumineux backend
+backend/node_modules/*
+
+# fichier volumineux frontend
+
+# architecture projet
+backend/env
+

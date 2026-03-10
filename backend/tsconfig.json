@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    // Version de JavaScript que TypeScript va produire après compilation
+    "target": "ES2020",  // On cible ECMAScript 2020 (ES11). Les nouvelles fonctionnalités JS de 2020 seront supportées.
+
+    // Système de modules utilisé dans le code généré
+    "module": "commonjs",  // Type de module pour Node.js. CommonJS = require()/module.exports
+
+    // Bibliothèques JS à inclure pour la compilation
+    "lib": ["ES2020"],  // On inclut les fonctionnalités JS de 2020 (ex: Promise.allSettled, BigInt...)
+
+    // Générer des fichiers .js dans ce dossier
+    "outDir": "./dist",  // Dossier de sortie pour les fichiers compilés
+
+    // Racine des fichiers TypeScript
+    "rootDir": "./src",  // Dossier source contenant tes fichiers .ts
+
+    // Active toutes les vérifications strictes de TypeScript
+    "strict": true,  // Vérifie le typage strictement, utile pour éviter les erreurs
+
+    // Permet l'import de modules CommonJS comme s'ils étaient ES6
+    "esModuleInterop": true,  // Facilite l'import de modules JS externes (ex: import express from 'express')
+
+    // Ignore la vérification des fichiers .d.ts des bibliothèques
+    "skipLibCheck": true,  // Accélère la compilation, ignore les erreurs dans les types des librairies externes
+
+    // Assure que les fichiers ont une casse de nom cohérente
+    "forceConsistentCasingInFileNames": true,  // Évite les problèmes de majuscules/minuscules sur différents OS
+
+    // Permet d'importer directement des fichiers JSON
+    "resolveJsonModule": true  // Ex: import data from './data.json'
+  },
+
+  // Quels fichiers inclure dans la compilation
+  "include": ["src/**/*"],  // Tous les fichiers dans src et ses sous-dossiers
+
+  // Quels fichiers exclure
+  "exclude": ["node_modules", "dist"]  // On n'analyse pas les dépendances ni les fichiers compilés
+}

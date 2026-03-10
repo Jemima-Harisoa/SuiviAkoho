@@ -88,8 +88,6 @@
 
 **Conteneurs à mettre en place**
 - [ ] Conteneur SQL Server : Base de données
-- [ ] Conteneur Backend : API Node.js avec hot-reload
-- [ ] Conteneur Frontend Dev : Environnement de développement Electron
 - [ ] Volume partagé : Code source synchronisé avec l'hôte
 
 ### 1.3 Fichiers Docker à Créer
@@ -99,18 +97,6 @@
 - Contenu : Définition des services (sqlserver, backend, frontend)
 - Configuration : Réseaux, volumes, variables d'environnement, ports
 - Hot-reload : Montage des volumes pour synchronisation du code
-
-**Fichier : backend/Dockerfile**
-- Rôle : Image du conteneur backend Node.js
-- Base image : node:18-alpine
-- Installation : Dépendances npm
-- Commande : nodemon pour hot-reload
-
-**Fichier : frontend/Dockerfile**
-- Rôle : Image du conteneur frontend Electron
-- Base image : node:18
-- Installation : Dépendances npm et Electron
-- Configuration : Environnement X11 pour affichage GUI
 
 **Fichier : .dockerignore**
 - Rôle : Exclure fichiers inutiles lors du build Docker
@@ -129,8 +115,7 @@
 
 **Mapping des ports**
 - [ ] 1433 : SQL Server (accessible depuis l'hôte)
-- [ ] 3000 : Backend API (accessible depuis l'hôte)
-- [ ] 5000 : Electron app (port de debug)
+
 
 ### 1.5 Volumes Docker
 
