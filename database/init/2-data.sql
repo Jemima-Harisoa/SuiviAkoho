@@ -14,13 +14,13 @@
 
 USE SuiviAkoho;
 GO
-
+-- Définit comment SQL Server gère les comparaisons avec les valeurs NULL
 SET ANSI_NULLS ON;
 GO
-
+-- Détermine comment les identifiants entre guillemets sont interprétés
 SET QUOTED_IDENTIFIER ON;
 GO
-
+-- Empêche l’affichage du nombre de lignes affectées par chaque commande
 SET NOCOUNT ON;
 GO
 
