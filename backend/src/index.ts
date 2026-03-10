@@ -1,0 +1,41 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import dotenv from 'dotenv';
+import { getPool } from './config/database.config';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middlewares
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+// Route de test
+app.get('/health', async (req, res) => {
+  try {
+    await getPool();
+    res.json({ 
+      status: 'OK', 
+      message: 'Serveur et DB opérationnels' 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'ERROR', 
+      message: 'Problème de connexion DB' 
+    });
+  }
+});
+
+// Démarrage
+app.listen(PORT, async () => {
+  console.log(`Serveur démarré sur http://localhost:${PORT}`);
+  try {
+    await getPool();
+  } catch (error) {
+    console.error('Impossible de se connecter à la DB:', error);
+  }
+});

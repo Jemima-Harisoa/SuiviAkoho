@@ -3,10 +3,10 @@ docker exec -it sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P De
 
 # Iitialisation du backend 
 ## Installation des Dépendances de production (ce qui tourne en prod)
-npm install -D typescript ts-node nodemon @types/express @types/node @types/cors
+npm install -D typescript ts-node nodemon @types/express @types/node @types/cors  mssql
 
 ## Insatallation des Dépendances de développement (outils dev uniquement)
-npm install -D typescript ts-node nodemon @types/express @types/node @types/cors
+npm install -D typescript ts-node nodemon @types/express @types/node @types/cors  @types/mssql
 
 ## Installation de typescript globalement
 npx tsc --init
