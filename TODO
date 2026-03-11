@@ -1,1565 +1,772 @@
 # TODO - SUIVI D'ÉLEVAGE DE POULETS (AkoFre)
+> Architecture : SQL Server (Docker) · Backend Node.js/Express/TypeScript (local) · Frontend Angular + Electron (local)
+
+---
 
 ## TABLE DES MATIÈRES
 
-1. [Phase 0 : Préparation et Compréhension](#phase-0--préparation-et-compréhension)
-2. [Phase 1 : Setup Environnement Docker](#phase-1--setup-environnement-docker)
-3. [Phase 2 : Backend - API Node.js](#phase-2--backend---api-nodejs)
-4. [Phase 3 : Desktop - Application Electron](#phase-3--desktop---application-electron)
-5. [Phase 4 : Intégration et Tests](#phase-4--intégration-et-tests)
-6. [Phase 5 : Versioning et Déploiement](#phase-5--versioning-et-déploiement)
-7. [Bonnes Pratiques de Reprise de Code](#bonnes-pratiques-de-reprise-de-code)
+1. [État des Lieux](#état-des-lieux)
+2. [Phase 0 : Compréhension du Domaine](#phase-0--compréhension-du-domaine)
+3. [Phase 1 : Environnement Local](#phase-1--environnement-local)
+4. [Phase 2 : Backend — Consolidation et Complétion](#phase-2--backend--consolidation-et-complétion)
+5. [Phase 3 : Frontend Angular + Electron](#phase-3--frontend-angular--electron)
+6. [Phase 4 : Intégration et Tests](#phase-4--intégration-et-tests)
+7. [Phase 5 : Versioning et Packaging](#phase-5--versioning-et-packaging)
+8. [Bonnes Pratiques de Reprise de Code](#bonnes-pratiques-de-reprise-de-code)
+9. [Planning Suggéré](#planning-suggéré)
 
 ---
 
-## PHASE 0 : PRÉPARATION ET COMPRÉHENSION
+## ÉTAT DES LIEUX
 
-### Comprendre le Domaine Métier
+### ✅ Déjà fait
+- [x] Docker + SQL Server opérationnel (port 1433)
+- [x] Schéma BDD complet — toutes les tables `elevage.*` créées
+- [x] Données de référence insérées (Sexe, TypeProduction, Race, PhaseAlimentation, Unite, Parametre)
+- [x] Backend : endpoint Race (GET /api/races · POST /api/races) fonctionnel
 
-#### Étapes de compréhension
-- [X] Lire et comprendre le README.md (concept de LOT, cycle d'élevage)
-- [X] Identifier les types de production :
-  - Poulet chair (42-45 jours)
-  - Poules pondeuses (20-72 semaines)
-  - Production d'œufs
-  - Incubation
-- [X] Comprendre le principe : 1 lot = 1 race = même âge
-- [X] Noter les unités utilisées :
-  - Poids : grammes (g) vers kilogrammes (kg)
-  - Monnaie : Ariary (Ar)
-  - Temps : semaines pour suivi
-
-#### Comprendre la Base de Données
-
-**Tables de Référence**
-- [X] elevage.Sexe : Référentiel des sexes (Mâle/Femelle/Mixte)
-- [X] elevage.TypeProduction : Types de production de l'exploitation (Chair/Pondeuse/Oeuf/Incubation)
-- [X] elevage.Race : Races de poulets avec description JSON
-- [X] elevage.PhaseAlimentation : Phases d'alimentation par âge (Starter/Grower/Finisher)
-- [X] elevage.ReferenceCompositionAliment : Composition des aliments (ingrédients et pourcentages)
-- [X] elevage.Unite : Unités de mesure avec correspondances de conversion (g, kg, pièce, etc)
-- [X] elevage.Parametre : Valeurs paramétriques immuables avec date d'effet (température incubation, prix marché)
-
-**Tables Métier**
-- [X] elevage.Lot : Entité centrale, un lot de poulets élevés ensemble
-- [X] elevage.Incubation : Suivi des incubations d'œufs (21 jours)
-- [X] elevage.SuiviPoulet : Suivi hebdomadaire des poulets chair (poids, ration, coût)
-- [X] elevage.SuiviOeuf : Suivi hebdomadaire de la ponte (nombre, taux, revenu)
-- [X] elevage.TraitementOeufs : Destination des œufs (Vente ou Incubation)
-
-**Tables d'Historique**
-- [X] elevage.HistoriqueSuiviPoulet : Évolution par semaine de la croissance
-- [X] elevage.HistoriqueSuiviOeuf : Évolution quotidienne de la ponte
-- [X] elevage.HistoriqueIncubation : Évolution quotidienne des incubations
-
-**Tables de Gestion Commerciale**
-- [X] elevage.Production : Stock destiné à la vente immédiate (œufs et poules disponibles)
-- [X] elevage.HistoriqueVente : Ventes effectuées avec CA, bénéfice, réalisation
-- [X] elevage.Prevision : Planification des dépenses à effectuer (budget prévisionnel)
-- [X] elevage.HistoriqueAchat : Achats et dépenses réalisés (aliment, médicament, poussins)
-
-#### Comprendre les Relations
-
-- [ ] Analyser les clés étrangères
-- [ ] Identifier les cardinalités (1-N, N-N)
-- [ ] Noter les colonnes calculées PERSISTED :
-  - ExpectedHatchDate : StartDate + 21 jours
-  - HatchRatePct : Taux d'éclosion calculé
-  - TotalAmountAr : Montant total de vente
-
-#### Analyser les Règles Métier
-
-- [ ] Contraintes d'intégrité (InitialCount > 0, MaleCount + FemaleCount <= InitialCount)
-- [ ] Validations de données (taux entre 0 et 100, montants positifs)
-- [ ] Calculs automatiques (valeur théorique lot, coût aliment cumulé)
-- [ ] Statuts possibles (ACTIF, CLOTURE, ANNULE)
+### 🔲 Reste à faire
+- [ ] Audit complet du code backend existant
+- [ ] Compléter tous les modules backend (modèles → repositories → services → controllers → routes)
+- [ ] Middlewares, utilitaires, app.ts propre
+- [ ] Créer le frontend Angular + Electron (from scratch)
+- [ ] Intégration end-to-end, tests, packaging
 
 ---
 
-## PHASE 1 : SETUP ENVIRONNEMENT DOCKER
+## PHASE 0 : COMPRÉHENSION DU DOMAINE
+
+> **Règle de reprise de code :** Avant de toucher au code, comprendre le domaine métier.
+> Si tu reprends le projet après une pause, relis cette section en premier.
+
+### Domaine Métier
+
+- Un **LOT** = groupe de poulets de même race, même âge, élevés ensemble
+- Deux activités principales :
+  - **Poulets chair** : élevés 42–45 jours puis vendus (suivi poids, ration, mortalité)
+  - **Poules pondeuses** : élevées 20–72 semaines (suivi de la ponte)
+- Les **œufs** peuvent être vendus ou mis en **incubation** (21 jours → nouveau lot)
+- Monnaie : **Ariary (Ar)** · Poids : **grammes → kg** · Temps : **semaines**
+
+### Glossaire
+
+| Terme | Signification |
+|---|---|
+| Lot | Groupe de poulets élevés ensemble (entité centrale) |
+| SuiviPoulet | Enregistrement hebdomadaire : poids moyen, ration, mortalité |
+| SuiviOeuf | Enregistrement hebdomadaire : nombre d'œufs, taux de ponte |
+| TraitementOeufs | Destination des œufs collectés : Vente ou Incubation |
+| Incubation | Mise en couveuse d'œufs pendant 21 jours |
+| Production | Stock disponible à la vente (œufs + poulets) |
+| Prevision | Budget prévisionnel des dépenses futures |
+| HistoriqueAchat | Dépenses réalisées : aliment, médicament, achat de poussins |
+
+### Tables BDD — Vue d'ensemble
+
+**Référence** *(données fixes, déjà insérées)*
+`elevage.Sexe` · `elevage.TypeProduction` · `elevage.Race` · `elevage.PhaseAlimentation` · `elevage.ReferenceCompositionAliment` · `elevage.Unite` · `elevage.Parametre`
+
+**Métier** *(données vivantes)*
+`elevage.Lot` ← entité centrale · `elevage.Incubation` · `elevage.SuiviPoulet` · `elevage.SuiviOeuf` · `elevage.TraitementOeufs`
+
+**Historique**
+`elevage.HistoriqueSuiviPoulet` · `elevage.HistoriqueSuiviOeuf` · `elevage.HistoriqueIncubation`
+
+**Commercial**
+`elevage.Production` · `elevage.HistoriqueVente` · `elevage.Prevision` · `elevage.HistoriqueAchat`
+
+### Règles Métier à Connaître
+
+- [ ] Clés étrangères et cardinalités (1-N entre Lot → SuiviPoulet, etc.)
+- [ ] Colonnes calculées PERSISTED : `ExpectedHatchDate` (StartDate + 21j), `HatchRatePct`, `TotalAmountAr`
+- [ ] Contraintes : `InitialCount > 0`, `MaleCount + FemaleCount <= InitialCount`
+- [ ] Validations : taux entre 0 et 100, montants positifs
+- [ ] Statuts de lot : `ACTIF`, `CLOTURE`, `ANNULE`
+
+---
+
+## PHASE 1 : ENVIRONNEMENT LOCAL
+
+> **Objectif :** Avoir un environnement qui tourne en 1 commande, reproductible sur toute machine.
 
 ### 1.1 Prérequis
 
-**Installation des outils**
-- [ ] Installer extension Docker pour VS Code
-- [ ] Installer extension Remote - Containers pour VS Code
+- [x] Node.js v24 · npm v11 · nvm v1.2.2
+- [x] Docker Desktop avec SQL Server actif (port 1433)
+- [ ] VS Code + extensions : **ESLint**, **Prettier**, **REST Client**
+- [ ] Azure Data Studio ou DBeaver (client SQL pour visualiser/requêter la BDD)
 
-### 1.2 Architecture Docker
+### 1.2 Structure de Dossiers du Projet
 
-**Conteneurs à mettre en place**
-- [ ] Conteneur SQL Server : Base de données
-- [ ] Volume partagé : Code source synchronisé avec l'hôte
+```
+SuiviAkoho/
+├── database/
+│   ├── init/
+│   │   └── init.sql          ✅ existant
+│   └── entrypoint.sh         ✅ existant
+├── docker-compose.yml        ✅ existant (SQL Server uniquement)
+├── backend/                  ⚙️  en cours
+│   ├── src/
+│   ├── package.json
+│   └── tsconfig.json
+├── frontend/                 🔲 à créer
+│   ├── electron/
+│   └── src/
+├── .env                      🔲 à créer (jamais commité)
+├── .env.example              🔲 à créer (commité sans valeurs)
+└── .gitignore                🔲 à vérifier/compléter
+```
 
-### 1.3 Fichiers Docker à Créer
+### 1.3 Fichiers de Configuration
 
-**Fichier : docker-compose.yml**
-- Rôle : Orchestration de tous les conteneurs
-- Contenu : Définition des services (sqlserver, backend, frontend)
-- Configuration : Réseaux, volumes, variables d'environnement, ports
-- Hot-reload : Montage des volumes pour synchronisation du code
+**`.env`** — à la racine, **jamais dans Git**
+```
+DB_HOST=localhost
+DB_PORT=1433
+DB_USER=sa
+DB_PASSWORD=Dev@12345
+DB_NAME=SuiviAkoho
+BACKEND_PORT=3000
+NODE_ENV=development
+```
 
-**Fichier : .dockerignore**
-- Rôle : Exclure fichiers inutiles lors du build Docker
-- Contenu : node_modules, dist, .git, logs, .env
+**`.env.example`** — commité sur Git, sans valeurs sensibles
+```
+DB_HOST=localhost
+DB_PORT=1433
+DB_USER=sa
+DB_PASSWORD=
+DB_NAME=SuiviAkoho
+BACKEND_PORT=3000
+NODE_ENV=development
+```
 
-**Fichier : docker-entrypoint.sh**
-- Rôle : Script d'initialisation des conteneurs
-- Actions : Attente de la disponibilité de SQL Server, exécution des migrations
+**`.gitignore`** — à la racine
+```
+node_modules/
+dist/
+build/
+release/
+.env
+*.log
+coverage/
+```
 
-### 1.4 Configuration Réseau Docker
+### 1.4 Checklist Vérification Environnement
 
-**Réseau bridge personnalisé**
-- [ ] Créer un réseau akoho-network
-- [ ] Connecter tous les conteneurs au réseau
-- [ ] Activer la résolution DNS entre conteneurs
-
-**Mapping des ports**
-- [ ] 1433 : SQL Server (accessible depuis l'hôte)
-
-
-### 1.5 Volumes Docker
-
-**Volume pour SQL Server**
-- [ ] Nom : sqlserver-data
-- [ ] Rôle : Persistance des données de la base
-- [ ] Montage : /var/opt/mssql
-
-**Volume pour le code source**
-- [ ] Type : bind mount
-- [ ] Source : Répertoire du projet sur l'hôte
-- [ ] Destination : /app dans les conteneurs
-- [ ] Rôle : Synchronisation temps réel du code
-
-### 1.6 Variables d'Environnement
-
-**Fichier : .env**
-- Rôle : Configuration centralisée des paramètres
-- Variables SQL Server : host, port, user, password, database
-- Variables Backend : port, node environment
-- Variables Frontend : API URL
-
-**Fichier : .env.example**
-- Rôle : Template de configuration pour nouveaux développeurs
-- Contenu : Toutes les variables avec valeurs par défaut
-
-### 1.7 Scripts de Démarrage
-
-**Fichier : scripts/start.bat - scripts/start-dev.sh**
-- Rôle : Démarrer l'environnement de développement complet
-- Actions : docker-compose up, attente initialisation, logs
-
-**Fichier : scripts/stop.bat - scripts/stop-dev.sh**
-- Rôle : Arrêter proprement tous les conteneurs
-- Actions : docker-compose down, nettoyage
-
-**Fichier : scripts/reset.bat - scripts/reset-db.sh**
-- Rôle : Réinitialiser la base de données
-- Actions : Suppression volume, recréation, exécution init.sql
-
-**Fichier : scripts/logs.bat - scripts/logs.sh**
-- Rôle : Afficher les logs d'un conteneur spécifique
-- Usage : ./logs.sh backend ou ./logs.sh sqlserver
-
-### 1.8 Initialisation Base de Données
-
-**Fichier : database/init.sql**
-- Rôle : Script de création du schéma complet
-- Contenu : Création tables, contraintes, index, schéma
-
-**Fichier : database/test-data.sql**
-- Rôle : Insertion des données de référence
-- Contenu : Sexes, Types de production, Races, Phases alimentation, Unités, Paramètres
-
-**Fichier : database/migrations/**
-- Rôle : Scripts de migration versionnés
-- Format : YYYYMMDD_description.sql
-- Utilité : Évolution contrôlée du schéma
-
-### 1.9 Tâches de Setup
-
-**Configuration Docker**
-- [ ] Créer le fichier docker-compose.yml
-- [ ] Créer les Dockerfile (backend, frontend)
-- [ ] Configurer les volumes
-- [ ] Configurer le réseau
-- [ ] Tester docker-compose up
-- [ ] Vérifier la communication inter-conteneurs
-
-**Initialisation Base de Données**
-- [ ] Copier init.sql dans database/
-- [ ] Créer test-data.sql avec données de référence
-- [ ] Configurer l'auto-exécution au démarrage
-- [ ] Vérifier la création des tables
-- [ ] Vérifier l'insertion des données de référence
-
-**Test de l'Environnement**
-- [ ] Lancer docker-compose up
-- [ ] Vérifier que SQL Server démarre
-- [ ] Se connecter à SQL Server depuis Azure Data Studio
-- [ ] Vérifier que le backend démarre
-- [ ] Tester le hot-reload du backend
-- [ ] Vérifier les logs de chaque conteneur
+- [ ] `docker ps` → conteneur `sqlserver` visible et `healthy`
+- [ ] Connexion Azure Data Studio → localhost:1433, user: sa
+- [ ] Tables `elevage.*` visibles avec données de référence
+- [ ] `cd backend && npm install && npm run dev` → serveur démarre sans erreur
+- [ ] `GET http://localhost:3000/api/races` → retourne la liste des races en JSON
 
 ---
 
-## PHASE 2 : BACKEND - API NODE.JS
-
-### 2.1 Structure du Projet Backend
-
-**Répertoire racine : backend/**
-
-**backend/package.json**
-- Rôle : Gestion des dépendances npm
-- Scripts : dev (nodemon), build (tsc), start (node)
-- Dépendances : express, mssql, dotenv, cors, helmet
-
-**backend/tsconfig.json**
-- Rôle : Configuration TypeScript
-- Options : target ES2020, module commonjs, strict mode
-
-**backend/.env.example**
-- Rôle : Template des variables d'environnement
-
-**backend/.gitignore**
-- Rôle : Exclusion fichiers du versioning
-- Contenu : node_modules, dist, .env, logs
-
-### 2.2 Configuration
-
-**backend/src/config/database.config.ts**
-- Rôle : Configuration connexion SQL Server
-- Fonctions : getPool (obtenir connexion), closePool (fermer connexion)
-- Paramètres : serveur, port, database, user, password, options
-
-**backend/src/config/app.config.ts**
-- Rôle : Configuration générale de l'application
-- Paramètres : port, CORS, environnement, timeouts
-
-### 2.3 Modèles de Données
-
-**Modèles de Référence**
-
-**backend/src/models/sexe.model.ts**
-- Interface Sexe
-- Interface CreateSexeDto
-- Représente les sexes possibles des poulets
-
-**backend/src/models/type-production.model.ts**
-- Interface TypeProduction
-- Interface CreateTypeProductionDto
-- Représente les types de production (Chair, Pondeuse, Oeuf, Incubation)
-
-**backend/src/models/race.model.ts**
-- Interface Race
-- Interface CreateRaceDto
-- Représente les races de poulets avec description JSON
-
-**backend/src/models/phase-alimentation.model.ts**
-- Interface PhaseAlimentation
-- Interface CreatePhaseAlimentationDto
-- Représente les phases d'alimentation par tranche d'âge
-
-**backend/src/models/composition-aliment.model.ts**
-- Interface ReferenceCompositionAliment
-- Interface CreateCompositionAlimentDto
-- Représente la composition des aliments (ingrédients et pourcentages)
-
-**backend/src/models/unite.model.ts**
-- Interface Unite
-- Interface CreateUniteDto
-- Interface ConversionUnite
-- Représente les unités de mesure avec facteurs de conversion
-
-**backend/src/models/parametre.model.ts**
-- Interface Parametre
-- Interface CreateParametreDto
-- Représente les paramètres configurables avec date d'effet
-
-**Modèles Métier**
-
-**backend/src/models/lot.model.ts**
-- Interface Lot
-- Interface CreateLotDto
-- Interface UpdateLotDto
-- Représente un lot de poulets
-
-**backend/src/models/incubation.model.ts**
-- Interface Incubation
-- Interface CreateIncubationDto
-- Interface UpdateIncubationDto
-- Représente une incubation d'œufs
-
-**backend/src/models/suivi-poulet.model.ts**
-- Interface SuiviPoulet
-- Interface CreateSuiviPouletDto
-- Interface UpdateSuiviPouletDto
-- Représente le suivi hebdomadaire d'un lot de poulets chair
-
-**backend/src/models/suivi-oeuf.model.ts**
-- Interface SuiviOeuf
-- Interface CreateSuiviOeufDto
-- Interface UpdateSuiviOeufDto
-- Représente le suivi hebdomadaire de la ponte
-
-**backend/src/models/traitement-oeufs.model.ts**
-- Interface TraitementOeufs
-- Interface CreateTraitementOeufsDto
-- Représente le traitement des œufs (Vente ou Incubation)
-
-**Modèles d'Historique**
-
-**backend/src/models/historique-suivi-poulet.model.ts**
-- Interface HistoriqueSuiviPoulet
-- Interface CreateHistoriqueSuiviPouletDto
-- Représente l'évolution hebdomadaire d'un suivi poulet
-
-**backend/src/models/historique-suivi-oeuf.model.ts**
-- Interface HistoriqueSuiviOeuf
-- Interface CreateHistoriqueSuiviOeufDto
-- Représente l'évolution quotidienne d'un suivi ponte
-
-**backend/src/models/historique-incubation.model.ts**
-- Interface HistoriqueIncubation
-- Interface CreateHistoriqueIncubationDto
-- Représente l'évolution quotidienne d'une incubation
-
-**Modèles Commerciaux**
-
-**backend/src/models/production.model.ts**
-- Interface Production
-- Interface CreateProductionDto
-- Interface UpdateProductionDto
-- Représente le stock disponible à la vente (œufs et poules)
-
-**backend/src/models/historique-vente.model.ts**
-- Interface HistoriqueVente
-- Interface CreateHistoriqueVenteDto
-- Représente les ventes effectuées avec CA et bénéfice
-
-**backend/src/models/prevision.model.ts**
-- Interface Prevision
-- Interface CreatePrevisionDto
-- Interface UpdatePrevisionDto
-- Représente les prévisions de dépenses
-
-**backend/src/models/historique-achat.model.ts**
-- Interface HistoriqueAchat
-- Interface CreateHistoriqueAchatDto
-- Représente les achats effectués (aliment, médicament, poussins)
-
-### 2.4 Repositories (Accès aux Données)
-
-**Repositories de Référence**
-
-**backend/src/repositories/sexe.repository.ts**
-- Classe SexeRepository
-- Méthodes : findAll, findById, create, update, delete
-- Rôle : Accès aux données de la table Sexe
-
-**backend/src/repositories/type-production.repository.ts**
-- Classe TypeProductionRepository
-- Méthodes : findAll, findById, findByCode, create, update, delete
-- Rôle : Accès aux données de la table TypeProduction
-
-**backend/src/repositories/race.repository.ts**
-- Classe RaceRepository
-- Méthodes : findAll, findById, findByName, create, update, delete
-- Rôle : Accès aux données de la table Race
-
-**backend/src/repositories/phase-alimentation.repository.ts**
-- Classe PhaseAlimentationRepository
-- Méthodes : findAll, findById, findByRaceAndType, create, update, delete
-- Rôle : Accès aux données de la table PhaseAlimentation
-
-**backend/src/repositories/composition-aliment.repository.ts**
-- Classe CompositionAlimentRepository
-- Méthodes : findAll, findById, findByIngredient, create, update, delete
-- Rôle : Accès aux données de la table ReferenceCompositionAliment
-
-**backend/src/repositories/unite.repository.ts**
-- Classe UniteRepository
-- Méthodes : findAll, findById, findByCode, getConversionFactor, create, update, delete
-- Rôle : Accès aux données de la table Unite et conversions
-
-**backend/src/repositories/parametre.repository.ts**
-- Classe ParametreRepository
-- Méthodes : findAll, findById, findByCode, findActiveByDate, create, update, delete
-- Rôle : Accès aux données de la table Parametre
-
-**Repositories Métier**
-
-**backend/src/repositories/lot.repository.ts**
-- Classe LotRepository
-- Méthodes : findAll, findById, findByCode, findByStatus, findByRace, create, update, delete
-- Rôle : Accès aux données de la table Lot
-
-**backend/src/repositories/incubation.repository.ts**
-- Classe IncubationRepository
-- Méthodes : findAll, findById, findByLot, findByDateRange, create, update, delete
-- Rôle : Accès aux données de la table Incubation
-
-**backend/src/repositories/suivi-poulet.repository.ts**
-- Classe SuiviPouletRepository
-- Méthodes : findAll, findByLot, findByLotAndWeek, create, update, delete
-- Rôle : Accès aux données de la table SuiviPoulet
-
-**backend/src/repositories/suivi-oeuf.repository.ts**
-- Classe SuiviOeufRepository
-- Méthodes : findAll, findByLot, findByLotAndWeek, create, update, delete
-- Rôle : Accès aux données de la table SuiviOeuf
-
-**backend/src/repositories/traitement-oeufs.repository.ts**
-- Classe TraitementOeufsRepository
-- Méthodes : findAll, findBySuiviOeuf, findByType, create, update, delete
-- Rôle : Accès aux données de la table TraitementOeufs
-
-**Repositories d'Historique**
-
-**backend/src/repositories/historique-suivi-poulet.repository.ts**
-- Classe HistoriqueSuiviPouletRepository
-- Méthodes : findAll, findBySuiviPoulet, findByDateRange, create, delete
-- Rôle : Accès aux données de la table HistoriqueSuiviPoulet
-
-**backend/src/repositories/historique-suivi-oeuf.repository.ts**
-- Classe HistoriqueSuiviOeufRepository
-- Méthodes : findAll, findBySuiviOeuf, findByDateRange, create, delete
-- Rôle : Accès aux données de la table HistoriqueSuiviOeuf
-
-**backend/src/repositories/historique-incubation.repository.ts**
-- Classe HistoriqueIncubationRepository
-- Méthodes : findAll, findByIncubation, findByDateRange, create, delete
-- Rôle : Accès aux données de la table HistoriqueIncubation
-
-**Repositories Commerciaux**
-
-**backend/src/repositories/production.repository.ts**
-- Classe ProductionRepository
-- Méthodes : findAll, findById, findByLot, findAvailableStock, create, update, delete
-- Rôle : Accès aux données de la table Production
-
-**backend/src/repositories/historique-vente.repository.ts**
-- Classe HistoriqueVenteRepository
-- Méthodes : findAll, findById, findByLot, findByDateRange, create, delete
-- Rôle : Accès aux données de la table HistoriqueVente
-
-**backend/src/repositories/prevision.repository.ts**
-- Classe PrevisionRepository
-- Méthodes : findAll, findById, findByDateRange, findPending, create, update, delete
-- Rôle : Accès aux données de la table Prevision
-
-**backend/src/repositories/historique-achat.repository.ts**
-- Classe HistoriqueAchatRepository
-- Méthodes : findAll, findById, findByCategory, findByDateRange, create, delete
-- Rôle : Accès aux données de la table HistoriqueAchat
-
-### 2.5 Services (Logique Métier)
-
-**Services de Référence**
-
-**backend/src/services/reference.service.ts**
-- Classe ReferenceService
-- Rôle : Gestion globale des données de référence
-- Méthodes : getAllSexes, getAllTypeProductions, getAllRaces, getAllPhases, getAllUnites, getAllParametres
-
-**Services Métier**
-
-**backend/src/services/lot.service.ts**
-- Classe LotService
-- Rôle : Logique métier pour les lots
-- Validations : InitialCount > 0, MaleCount + FemaleCount <= InitialCount
-- Fonctions : Génération automatique du code lot, calcul effectif actuel, clôture de lot
-
-**backend/src/services/incubation.service.ts**
-- Classe IncubationService
-- Rôle : Logique métier pour les incubations
-- Validations : EggsSetCount > 0, durée 21 jours
-- Fonctions : Calcul date éclosion, calcul taux éclosion, création lot automatique si succès
-
-**backend/src/services/suivi.service.ts**
-- Classe SuiviService
-- Rôle : Logique métier pour le suivi des poulets et œufs
-- Fonctions : Calcul variation poids, calcul coût aliment cumulé, calcul taux ponte, génération historique
-
-**backend/src/services/traitement-oeufs.service.ts**
-- Classe TraitementOeufsService
-- Rôle : Logique métier pour le traitement des œufs
-- Fonctions : Enregistrer vente, enregistrer mise en incubation, lier incubation
-
-**Services Commerciaux**
-
-**backend/src/services/production.service.ts**
-- Classe ProductionService
-- Rôle : Gestion du stock disponible
-- Fonctions : Ajouter au stock, retirer du stock, calculer valeur stock
-
-**backend/src/services/vente.service.ts**
-- Classe VenteService
-- Rôle : Gestion des ventes
-- Fonctions : Enregistrer vente, calculer CA, calculer bénéfice, mettre à jour stock
-
-**backend/src/services/achat.service.ts**
-- Classe AchatService
-- Rôle : Gestion des achats et dépenses
-- Fonctions : Enregistrer achat, catégoriser dépense, calculer coût total
-
-**backend/src/services/prevision.service.ts**
-- Classe PrevisionService
-- Rôle : Gestion des prévisions budgétaires
-- Fonctions : Créer prévision, marquer comme réalisée, comparer prévu vs réalisé
-
-**Services Utilitaires**
-
-**backend/src/services/calcul.service.ts**
-- Classe CalculService
-- Rôle : Calculs transverses
-- Fonctions : Convertir unités, calculer valeur théorique lot, calculer rentabilité
-
-**backend/src/services/statistiques.service.ts**
-- Classe StatistiquesService
-- Rôle : Génération de statistiques et indicateurs
-- Fonctions : CA mensuel, bénéfice par lot, taux mortalité, taux ponte moyen
-
-### 2.6 Controllers (API Endpoints)
-
-**Controllers de Référence**
-
-**backend/src/controllers/reference.controller.ts**
-- Classe ReferenceController
-- Endpoints : GET /api/references (toutes les données de référence)
-- Rôle : Fournir les données de référence au frontend
-
-**Controllers Métier**
-
-**backend/src/controllers/lot.controller.ts**
-- Classe LotController
-- Endpoints :
-  - GET /api/lots : Liste tous les lots
-  - GET /api/lots/:id : Détail d'un lot
-  - GET /api/lots/actifs : Lots actifs uniquement
-  - POST /api/lots : Créer un nouveau lot
-  - PUT /api/lots/:id : Mettre à jour un lot
-  - DELETE /api/lots/:id : Supprimer un lot
-- Rôle : Exposer les fonctionnalités de gestion des lots
-
-**backend/src/controllers/incubation.controller.ts**
-- Classe IncubationController
-- Endpoints :
-  - GET /api/incubations : Liste toutes les incubations
-  - GET /api/incubations/:id : Détail d'une incubation
-  - POST /api/incubations : Créer une incubation
-  - PUT /api/incubations/:id/resultat : Enregistrer résultat éclosion
-- Rôle : Exposer les fonctionnalités de gestion des incubations
-
-**backend/src/controllers/suivi-poulet.controller.ts**
-- Classe SuiviPouletController
-- Endpoints :
-  - GET /api/suivi-poulet/lot/:lotId : Suivi complet d'un lot
-  - POST /api/suivi-poulet : Créer un suivi hebdomadaire
-  - PUT /api/suivi-poulet/:id : Mettre à jour un suivi
-  - POST /api/suivi-poulet/mortalite : Enregistrer mortalité
-  - POST /api/suivi-poulet/vente : Enregistrer vente de poulets
-- Rôle : Exposer les fonctionnalités de suivi des poulets
-
-**backend/src/controllers/suivi-oeuf.controller.ts**
-- Classe SuiviOeufController
-- Endpoints :
-  - GET /api/suivi-oeuf/lot/:lotId : Suivi complet d'un lot pondeuse
-  - POST /api/suivi-oeuf : Créer un suivi hebdomadaire
-  - POST /api/suivi-oeuf/production : Enregistrer production quotidienne
-- Rôle : Exposer les fonctionnalités de suivi des œufs
-
-**backend/src/controllers/traitement-oeufs.controller.ts**
-- Classe TraitementOeufsController
-- Endpoints :
-  - POST /api/traitement-oeufs/vente : Enregistrer vente d'œufs
-  - POST /api/traitement-oeufs/incubation : Mettre en incubation
-  - GET /api/traitement-oeufs/lot/:lotId : Historique traitement d'un lot
-- Rôle : Exposer les fonctionnalités de traitement des œufs
-
-**Controllers Commerciaux**
-
-**backend/src/controllers/production.controller.ts**
-- Classe ProductionController
-- Endpoints :
-  - GET /api/production/stock : État actuel du stock
-  - GET /api/production/valeur : Valeur totale du stock
-  - POST /api/production : Ajouter au stock
-- Rôle : Exposer les fonctionnalités de gestion du stock
-
-**backend/src/controllers/vente.controller.ts**
-- Classe VenteController
-- Endpoints :
-  - GET /api/ventes : Liste toutes les ventes
-  - GET /api/ventes/ca : Chiffre d'affaires par période
-  - POST /api/ventes : Enregistrer une vente
-- Rôle : Exposer les fonctionnalités de gestion des ventes
-
-**backend/src/controllers/achat.controller.ts**
-- Classe AchatController
-- Endpoints :
-  - GET /api/achats : Liste tous les achats
-  - GET /api/achats/depenses : Total dépenses par période
-  - POST /api/achats : Enregistrer un achat
-- Rôle : Exposer les fonctionnalités de gestion des achats
-
-**backend/src/controllers/prevision.controller.ts**
-- Classe PrevisionController
-- Endpoints :
-  - GET /api/previsions : Liste toutes les prévisions
-  - GET /api/previsions/budget : Budget prévisionnel
-  - POST /api/previsions : Créer une prévision
-  - PUT /api/previsions/:id/realiser : Marquer comme réalisée
-- Rôle : Exposer les fonctionnalités de gestion des prévisions
-
-**Controllers Analytiques**
-
-**backend/src/controllers/dashboard.controller.ts**
-- Classe DashboardController
-- Endpoints :
-  - GET /api/dashboard : Données complètes du dashboard
-  - GET /api/dashboard/synthese : Synthèse des indicateurs clés
-- Rôle : Fournir les données agrégées pour le tableau de bord
-
-**backend/src/controllers/statistiques.controller.ts**
-- Classe StatistiquesController
-- Endpoints :
-  - GET /api/statistiques/ca : Évolution du CA
-  - GET /api/statistiques/benefices : Évolution des bénéfices
-  - GET /api/statistiques/mortalite : Taux de mortalité
-  - GET /api/statistiques/ponte : Performance de ponte
-- Rôle : Fournir les statistiques et analyses
+## PHASE 2 : BACKEND — CONSOLIDATION ET COMPLÉTION
+
+> **Règle d'or :** Auditer ce qui existe AVANT d'écrire une seule ligne.
+> Ne pas refactoriser avant d'avoir tout le fonctionnel.
+
+### 2.0 Audit du Code Existant — À Faire en Premier
+
+- [ ] Lire tout `backend/src/` et noter la structure utilisée
+- [ ] Identifier le pattern appliqué pour Race (direct dans controller ? via repository ?)
+- [ ] Vérifier comment la connexion BDD est gérée (pool partagé ? nouvelle connexion par requête ?)
+- [ ] Vérifier la gestion des erreurs actuelle (try/catch ? middleware global ?)
+- [ ] Vérifier que les variables `.env` sont utilisées (pas de credentials hardcodés)
+- [ ] Lister ce qui est conforme et ce qui doit être aligné avec le reste
+
+### 2.1 Configuration
+
+**`backend/package.json`**
+- Scripts : `dev` (nodemon + ts-node), `build` (tsc), `start` (node dist/)
+- Dépendances : `express`, `mssql`, `dotenv`, `cors`, `helmet`
+- DevDependencies : `typescript`, `ts-node`, `nodemon`, `@types/*`
+- [ ] Vérifier que tous ces packages sont présents
+
+**`backend/tsconfig.json`**
+- `target: ES2020`, `module: commonjs`, `strict: true`, `outDir: ./dist`
+- [ ] Vérifier la configuration existante
+
+**`backend/src/config/database.config.ts`**
+- Pool de connexions `mssql` (pas de nouvelle connexion par requête)
+- Fonctions : `getPool()`, `closePool()`
+- Lecture des variables depuis `.env`
+- [ ] Créer ou vérifier
+
+**`backend/src/config/app.config.ts`**
+- Port, CORS origins, NODE_ENV
+- [ ] Créer ou vérifier
+
+### 2.2 Structure Cible du Backend
+
+```
+backend/src/
+├── config/
+│   ├── database.config.ts    ← Pool connexion SQL Server
+│   └── app.config.ts         ← Config Express
+├── models/                   ← Interfaces TypeScript (formes des données)
+├── repositories/             ← Requêtes SQL uniquement
+├── services/                 ← Logique métier uniquement
+├── controllers/              ← Réception HTTP + appel service + réponse
+├── routes/
+│   └── index.ts              ← Agrège toutes les routes
+├── middlewares/
+├── utils/
+└── app.ts                    ← Point d'entrée Express
+```
+
+> **Pourquoi cette séparation ?**
+> `repository` ne parle qu'à la BDD · `service` n'applique que les règles métier · `controller` ne gère que le HTTP.
+> Chaque couche est testable indépendamment.
+
+---
+
+### 2.3 Modèles TypeScript
+
+> Pattern : `Interface` (lecture) + `CreateDto` (création) + `UpdateDto` (modification partielle).
+
+#### Référence *(données fixes)*
+- **`models/sexe.model.ts`** — `Sexe`, `CreateSexeDto`
+- **`models/type-production.model.ts`** — `TypeProduction`, `CreateTypeProductionDto`
+- **`models/race.model.ts`** ✅ existant — `Race`, `CreateRaceDto` — *à vérifier*
+- **`models/phase-alimentation.model.ts`** — `PhaseAlimentation`, `CreatePhaseAlimentationDto`
+- **`models/composition-aliment.model.ts`** — `ReferenceCompositionAliment`, `CreateCompositionAlimentDto`
+- **`models/unite.model.ts`** — `Unite`, `CreateUniteDto`, `ConversionUnite`
+- **`models/parametre.model.ts`** — `Parametre`, `CreateParametreDto`
+
+#### Métier
+- **`models/lot.model.ts`** — `Lot`, `CreateLotDto`, `UpdateLotDto`
+- **`models/incubation.model.ts`** — `Incubation`, `CreateIncubationDto`, `UpdateIncubationDto`
+- **`models/suivi-poulet.model.ts`** — `SuiviPoulet`, `CreateSuiviPouletDto`, `UpdateSuiviPouletDto`
+- **`models/suivi-oeuf.model.ts`** — `SuiviOeuf`, `CreateSuiviOeufDto`, `UpdateSuiviOeufDto`
+- **`models/traitement-oeufs.model.ts`** — `TraitementOeufs`, `CreateTraitementOeufsDto`
+
+#### Historique
+- **`models/historique-suivi-poulet.model.ts`** — `HistoriqueSuiviPoulet`, `CreateHistoriqueSuiviPouletDto`
+- **`models/historique-suivi-oeuf.model.ts`** — `HistoriqueSuiviOeuf`, `CreateHistoriqueSuiviOeufDto`
+- **`models/historique-incubation.model.ts`** — `HistoriqueIncubation`, `CreateHistoriqueIncubationDto`
+
+#### Commercial
+- **`models/production.model.ts`** — `Production`, `CreateProductionDto`, `UpdateProductionDto`
+- **`models/historique-vente.model.ts`** — `HistoriqueVente`, `CreateHistoriqueVenteDto`
+- **`models/prevision.model.ts`** — `Prevision`, `CreatePrevisionDto`, `UpdatePrevisionDto`
+- **`models/historique-achat.model.ts`** — `HistoriqueAchat`, `CreateHistoriqueAchatDto`
+
+---
+
+### 2.4 Repositories — Accès aux Données
+
+> **Règle :** Requêtes SQL paramétrées uniquement. Jamais de concaténation de chaîne.
+> Aucune logique métier dans les repositories.
+
+#### Référence
+- **`repositories/sexe.repository.ts`** — `findAll`, `findById`, `create`, `update`, `delete`
+- **`repositories/type-production.repository.ts`** — `findAll`, `findById`, `findByCode`, `create`, `update`, `delete`
+- **`repositories/race.repository.ts`** ✅ existant — `findAll`, `findById`, `findByName`, `create`, `update`, `delete` — *à vérifier*
+- **`repositories/phase-alimentation.repository.ts`** — `findAll`, `findById`, `findByRaceAndType`, `create`, `update`, `delete`
+- **`repositories/composition-aliment.repository.ts`** — `findAll`, `findById`, `findByIngredient`, `create`, `update`, `delete`
+- **`repositories/unite.repository.ts`** — `findAll`, `findById`, `findByCode`, `getConversionFactor`, `create`, `update`, `delete`
+- **`repositories/parametre.repository.ts`** — `findAll`, `findById`, `findByCode`, `findActiveByDate`, `create`, `update`, `delete`
+
+#### Métier
+- **`repositories/lot.repository.ts`** — `findAll`, `findById`, `findByCode`, `findByStatus`, `findByRace`, `create`, `update`, `delete`
+- **`repositories/incubation.repository.ts`** — `findAll`, `findById`, `findByLot`, `findByDateRange`, `create`, `update`, `delete`
+- **`repositories/suivi-poulet.repository.ts`** — `findAll`, `findByLot`, `findByLotAndWeek`, `create`, `update`, `delete`
+- **`repositories/suivi-oeuf.repository.ts`** — `findAll`, `findByLot`, `findByLotAndWeek`, `create`, `update`, `delete`
+- **`repositories/traitement-oeufs.repository.ts`** — `findAll`, `findBySuiviOeuf`, `findByType`, `create`, `update`, `delete`
+
+#### Historique
+- **`repositories/historique-suivi-poulet.repository.ts`** — `findAll`, `findBySuiviPoulet`, `findByDateRange`, `create`, `delete`
+- **`repositories/historique-suivi-oeuf.repository.ts`** — `findAll`, `findBySuiviOeuf`, `findByDateRange`, `create`, `delete`
+- **`repositories/historique-incubation.repository.ts`** — `findAll`, `findByIncubation`, `findByDateRange`, `create`, `delete`
+
+#### Commercial
+- **`repositories/production.repository.ts`** — `findAll`, `findById`, `findByLot`, `findAvailableStock`, `create`, `update`, `delete`
+- **`repositories/historique-vente.repository.ts`** — `findAll`, `findById`, `findByLot`, `findByDateRange`, `create`, `delete`
+- **`repositories/prevision.repository.ts`** — `findAll`, `findById`, `findByDateRange`, `findPending`, `create`, `update`, `delete`
+- **`repositories/historique-achat.repository.ts`** — `findAll`, `findById`, `findByCategory`, `findByDateRange`, `create`, `delete`
+
+---
+
+### 2.5 Services — Logique Métier
+
+> Les services appliquent les règles métier. Ils appellent les repositories et ne touchent jamais au HTTP.
+
+#### Référence
+**`services/reference.service.ts`**
+- Agrège tous les appels de référence : `getAllSexes`, `getAllTypeProductions`, `getAllRaces`, `getAllPhases`, `getAllUnites`, `getAllParametres`
+
+#### Métier
+**`services/lot.service.ts`**
+- Validation : `InitialCount > 0`, `MaleCount + FemaleCount <= InitialCount`
+- Génération automatique du code lot
+- Calcul effectif actuel (initial - mortalités - ventes)
+- Clôture de lot → statut `CLOTURE`
+
+**`services/incubation.service.ts`**
+- Validation : `EggsSetCount > 0`
+- Calcul `ExpectedHatchDate = StartDate + 21 jours`
+- Calcul taux d'éclosion : `HatchedCount / EggsSetCount * 100`
+- Option : création automatique d'un nouveau lot si éclosion réussie
+
+**`services/suivi-poulet.service.ts`**
+- Calcul variation de poids hebdomadaire
+- Calcul du coût aliment cumulé
+- Génération entrée `HistoriqueSuiviPoulet`
+- Validation : semaine non déjà saisie pour ce lot
+
+**`services/suivi-oeuf.service.ts`**
+- Calcul taux de ponte : `OeufsParJour / NbPoules * 100`
+- Calcul revenu hebdomadaire estimé
+- Génération entrée `HistoriqueSuiviOeuf`
+
+**`services/traitement-oeufs.service.ts`**
+- Vente d'œufs → mise à jour stock `Production`
+- Mise en incubation → créer entrée `Incubation`
+- Vérification stock disponible avant traitement
+
+#### Commercial
+**`services/production.service.ts`** — Ajouter/retirer du stock, valeur totale, vérification stock suffisant
+
+**`services/vente.service.ts`** — Enregistrer vente → créer `HistoriqueVente` + retirer de `Production`, calculer CA et bénéfice
+
+**`services/achat.service.ts`** — Enregistrer achat → créer `HistoriqueAchat`, catégoriser dépense, total par catégorie
+
+**`services/prevision.service.ts`** — Créer prévision, marquer comme réalisée, calculer écart prévu vs réalisé
+
+#### Utilitaires
+**`services/calcul.service.ts`** — Conversion d'unités (via table `Unite`), valeur théorique lot, rentabilité
+
+**`services/statistiques.service.ts`** — CA mensuel, bénéfice par lot, taux mortalité moyen, taux ponte moyen
+
+---
+
+### 2.6 Controllers — Endpoints API
+
+> Controller = recevoir requête HTTP + appeler service + retourner réponse JSON.
+> Aucune logique métier, aucune requête SQL.
+
+#### Référence
+**`controllers/reference.controller.ts`**
+- `GET /api/references` → toutes les données de référence en un appel (pour init frontend)
+
+#### Métier
+**`controllers/lot.controller.ts`**
+- `GET /api/lots` · `GET /api/lots/actifs` · `GET /api/lots/:id`
+- `POST /api/lots` · `PUT /api/lots/:id` · `DELETE /api/lots/:id`
+
+**`controllers/incubation.controller.ts`**
+- `GET /api/incubations` · `GET /api/incubations/:id`
+- `POST /api/incubations` · `PUT /api/incubations/:id/resultat`
+
+**`controllers/suivi-poulet.controller.ts`**
+- `GET /api/suivi-poulet/lot/:lotId`
+- `POST /api/suivi-poulet` · `PUT /api/suivi-poulet/:id`
+- `POST /api/suivi-poulet/mortalite` · `POST /api/suivi-poulet/vente`
+
+**`controllers/suivi-oeuf.controller.ts`**
+- `GET /api/suivi-oeuf/lot/:lotId`
+- `POST /api/suivi-oeuf` · `POST /api/suivi-oeuf/production`
+
+**`controllers/traitement-oeufs.controller.ts`**
+- `GET /api/traitement-oeufs/lot/:lotId`
+- `POST /api/traitement-oeufs/vente` · `POST /api/traitement-oeufs/incubation`
+
+#### Commercial
+**`controllers/production.controller.ts`**
+- `GET /api/production/stock` · `GET /api/production/valeur` · `POST /api/production`
+
+**`controllers/vente.controller.ts`**
+- `GET /api/ventes` · `GET /api/ventes/ca` · `POST /api/ventes`
+
+**`controllers/achat.controller.ts`**
+- `GET /api/achats` · `GET /api/achats/depenses` · `POST /api/achats`
+
+**`controllers/prevision.controller.ts`**
+- `GET /api/previsions` · `GET /api/previsions/budget`
+- `POST /api/previsions` · `PUT /api/previsions/:id/realiser`
+
+#### Analytique
+**`controllers/dashboard.controller.ts`**
+- `GET /api/dashboard` → tableau récap par lot (Lot, Nb Akoho, Achat, Sakafo, Maty, Poids Moyen, Bénéfice...)
+- `GET /api/dashboard/synthese` → indicateurs clés agrégés
+
+**`controllers/statistiques.controller.ts`**
+- `GET /api/statistiques/ca` · `GET /api/statistiques/benefices`
+- `GET /api/statistiques/mortalite` · `GET /api/statistiques/ponte`
+
+---
 
 ### 2.7 Routes
 
-**backend/src/routes/reference.routes.ts**
-- Définition des routes pour les données de référence
-- Préfixe : /api/references
-
-**backend/src/routes/lot.routes.ts**
-- Définition des routes pour les lots
-- Préfixe : /api/lots
-
-**backend/src/routes/incubation.routes.ts**
-- Définition des routes pour les incubations
-- Préfixe : /api/incubations
-
-**backend/src/routes/suivi-poulet.routes.ts**
-- Définition des routes pour le suivi poulets
-- Préfixe : /api/suivi-poulet
-
-**backend/src/routes/suivi-oeuf.routes.ts**
-- Définition des routes pour le suivi œufs
-- Préfixe : /api/suivi-oeuf
-
-**backend/src/routes/traitement-oeufs.routes.ts**
-- Définition des routes pour le traitement des œufs
-- Préfixe : /api/traitement-oeufs
-
-**backend/src/routes/production.routes.ts**
-- Définition des routes pour la production
-- Préfixe : /api/production
-
-**backend/src/routes/vente.routes.ts**
-- Définition des routes pour les ventes
-- Préfixe : /api/ventes
-
-**backend/src/routes/achat.routes.ts**
-- Définition des routes pour les achats
-- Préfixe : /api/achats
-
-**backend/src/routes/prevision.routes.ts**
-- Définition des routes pour les prévisions
-- Préfixe : /api/previsions
-
-**backend/src/routes/dashboard.routes.ts**
-- Définition des routes pour le dashboard
-- Préfixe : /api/dashboard
-
-**backend/src/routes/statistiques.routes.ts**
-- Définition des routes pour les statistiques
-- Préfixe : /api/statistiques
-
-**backend/src/routes/index.ts**
-- Agrégation de toutes les routes
-- Enregistrement dans l'application Express
-
-### 2.8 Middlewares
-
-**backend/src/middlewares/error.middleware.ts**
-- Gestion centralisée des erreurs
-- Format de réponse d'erreur uniforme
-- Logging des erreurs
-
-**backend/src/middlewares/validation.middleware.ts**
-- Validation des données en entrée
-- Utilisation de schémas de validation (ex: Joi, Yup)
-- Retour d'erreurs de validation explicites
-
-**backend/src/middlewares/logger.middleware.ts**
-- Logging de toutes les requêtes HTTP
-- Enregistrement méthode, URL, statut, durée
-
-**backend/src/middlewares/auth.middleware.ts**
-- Authentification (si nécessaire)
-- Vérification token JWT
-- Protection des routes sensibles
-
-### 2.9 Utilitaires
-
-**backend/src/utils/logger.ts**
-- Configuration du logger (Winston, Pino)
-- Niveaux de log : error, warn, info, debug
-- Rotation des fichiers de log
-
-**backend/src/utils/response.ts**
-- Format standardisé des réponses API
-- Fonctions : success, error, paginated
-
-**backend/src/utils/date.ts**
-- Utilitaires de manipulation de dates
-- Calculs : âge en semaines, différence de dates
-- Formatage : ISO, local
-
-**backend/src/utils/conversion.ts**
-- Fonctions de conversion d'unités
-- Utilisation de la table Unite pour facteurs de conversion
-
-### 2.10 Application Express
-
-**backend/src/app.ts**
-- Point d'entrée de l'application backend
-- Configuration Express : middlewares globaux, CORS, helmet
-- Enregistrement des routes
-- Gestion des erreurs 404
-- Démarrage du serveur
-- Gestion de l'arrêt gracieux (SIGINT, SIGTERM)
-
-### 2.11 Tests
-
-**Tests Unitaires**
-
-**backend/tests/unit/repositories/**
-- Tests des repositories
-- Mock de la base de données
-- Vérification des requêtes SQL
-
-**backend/tests/unit/services/**
-- Tests des services
-- Mock des repositories
-- Vérification de la logique métier
-
-**Tests d'Intégration**
-
-**backend/tests/integration/api/**
-- Tests des endpoints API
-- Utilisation de supertest
-- Base de données de test
-
-**Configuration des Tests**
-
-**backend/jest.config.js**
-- Configuration Jest
-- Environnement de test
-- Coverage
+- `routes/reference.routes.ts` → `/api/references`
+- `routes/lot.routes.ts` → `/api/lots`
+- `routes/incubation.routes.ts` → `/api/incubations`
+- `routes/suivi-poulet.routes.ts` → `/api/suivi-poulet`
+- `routes/suivi-oeuf.routes.ts` → `/api/suivi-oeuf`
+- `routes/traitement-oeufs.routes.ts` → `/api/traitement-oeufs`
+- `routes/production.routes.ts` → `/api/production`
+- `routes/vente.routes.ts` → `/api/ventes`
+- `routes/achat.routes.ts` → `/api/achats`
+- `routes/prevision.routes.ts` → `/api/previsions`
+- `routes/dashboard.routes.ts` → `/api/dashboard`
+- `routes/statistiques.routes.ts` → `/api/statistiques`
+- **`routes/index.ts`** → importe et enregistre toutes les routes ci-dessus
 
 ---
 
-## PHASE 3 : DESKTOP - APPLICATION ELECTRON
-
-### 3.1 Pourquoi Electron pour une Application Desktop
-
-**Avantages**
-- Utilisation de technologies web (HTML, CSS, JavaScript/TypeScript)
-- Cross-platform : Windows, macOS, Linux
-- Accès aux API natives du système d'exploitation
-- Packaging et distribution simplifiés
-- Large écosystème et communauté
-
-**Architecture Electron**
-- Process principal (main) : Gestion de l'application, fenêtres, menus
-- Process de rendu (renderer) : Interface utilisateur (HTML/CSS/JS)
-- IPC : Communication inter-process entre main et renderer
-
-### 3.2 Structure du Projet Frontend
-
-**Répertoire racine : frontend/**
-
-**frontend/package.json**
-- Dépendances : electron, electron-builder (packaging), angular, rxjs
-- Scripts : dev, build, package-windows, package-linux, package-mac
-
-**frontend/electron/main.ts**
-- Point d'entrée du process principal Electron
-- Création de la fenêtre principale
-- Gestion du cycle de vie de l'application
-- Configuration IPC
-
-**frontend/electron/preload.ts**
-- Script de préchargement
-- Exposition d'API sécurisées au process de rendu
-- Bridge entre main et renderer
-
-**frontend/tsconfig.json**
-- Configuration TypeScript pour le projet Electron
-
-**frontend/electron-builder.yml**
-- Configuration du packaging
-- Icônes, fichiers à inclure, plateformes cibles
-
-### 3.3 Application Angular
-
-**frontend/src/main.ts**
-- Point d'entrée de l'application Angular
-- Bootstrapping du module principal
-
-**frontend/src/app/app.component.ts**
-- Composant racine de l'application
-- Template et style
-
-**frontend/src/app/app.routes.ts**
-- Configuration du routing Angular
-- Routes vers les différents modules
-
-**frontend/src/app/app.config.ts**
-- Configuration globale de l'application Angular
-
-### 3.4 Core (Services et Modèles)
-
-**Services HTTP**
-
-**frontend/src/app/core/services/api.service.ts**
-- Service HTTP de base
-- Gestion des requêtes vers le backend
-- Intercepteurs pour erreurs et authentification
-
-**frontend/src/app/core/services/electron.service.ts**
-- Service d'interface avec les API Electron
-- Utilisation d'IPC pour communication avec le process principal
-- Accès aux fonctionnalités natives (fichiers, dialogs, notifications)
-
-**Services Métier**
-
-**frontend/src/app/core/services/lot.service.ts**
-- Interface avec l'API Lot
-- Méthodes : getAll, getById, create, update, delete
-
-**frontend/src/app/core/services/incubation.service.ts**
-- Interface avec l'API Incubation
-- Méthodes : getAll, getById, create, updateResultat
-
-**frontend/src/app/core/services/suivi.service.ts**
-- Interface avec l'API Suivi Poulet et Suivi Oeuf
-- Méthodes : getSuiviPoulet, getSuiviOeuf, createSuivi, recordMortalite, recordProduction
-
-**frontend/src/app/core/services/production.service.ts**
-- Interface avec l'API Production
-- Méthodes : getStock, addToStock, getStockValue
-
-**frontend/src/app/core/services/vente.service.ts**
-- Interface avec l'API Vente
-- Méthodes : getAll, getCA, createVente
-
-**frontend/src/app/core/services/achat.service.ts**
-- Interface avec l'API Achat
-- Méthodes : getAll, getDepenses, createAchat
-
-**frontend/src/app/core/services/prevision.service.ts**
-- Interface avec l'API Prevision
-- Méthodes : getAll, getBudget, createPrevision, markAsRealized
-
-**frontend/src/app/core/services/dashboard.service.ts**
-- Interface avec l'API Dashboard
-- Méthodes : getDashboardData, getSynthese
-
-**frontend/src/app/core/services/statistiques.service.ts**
-- Interface avec l'API Statistiques
-- Méthodes : getCA, getBenefices, getMortalite, getPonte
-
-**Modèles TypeScript**
-
-Tous les modèles correspondent aux interfaces définies dans le backend.
-
-**frontend/src/app/core/models/lot.model.ts**
-**frontend/src/app/core/models/incubation.model.ts**
-**frontend/src/app/core/models/suivi-poulet.model.ts**
-**frontend/src/app/core/models/suivi-oeuf.model.ts**
-**frontend/src/app/core/models/production.model.ts**
-**frontend/src/app/core/models/vente.model.ts**
-**frontend/src/app/core/models/achat.model.ts**
-**frontend/src/app/core/models/prevision.model.ts**
-
-### 3.5 Features (Fonctionnalités Applicatives)
-
-**Module Dashboard**
-
-**frontend/src/app/features/dashboard/dashboard.component.ts**
-- Composant du tableau de bord principal
-- Affichage synthèse des indicateurs clés
-- Tableau récapitulatif par lot
-- Filtrage par date
-
-**frontend/src/app/features/dashboard/dashboard.component.html**
-- Template du dashboard
-- Tableau avec colonnes : Lot, Nb Akoho, Achat, Sakafo, Maty, Poids Moyen, Prix Vente, Nb Atody, Prix Atody, Bénéfice
-
-**frontend/src/app/features/dashboard/dashboard.component.scss**
-- Styles du dashboard
-- Responsive design
-
-**Module Gestion des Lots**
-
-**frontend/src/app/features/lots/lot-list/lot-list.component.ts**
-- Liste de tous les lots
-- Filtres : statut, race, type de production
-- Recherche par code de lot
-
-**frontend/src/app/features/lots/lot-detail/lot-detail.component.ts**
-- Détail complet d'un lot
-- Informations générales
-- Historique des suivis
-- Graphiques d'évolution
-
-**frontend/src/app/features/lots/lot-form/lot-form.component.ts**
-- Formulaire de création/modification d'un lot
-- Sélection race, type de production
-- Saisie date éclosion, nombre initial, répartition mâles/femelles
-- Validation du formulaire
-
-**Module Suivi Poulets**
-
-**frontend/src/app/features/suivi-poulet/suivi-poulet-list/suivi-poulet-list.component.ts**
-- Liste des suivis pour un lot
-- Vue hebdomadaire
-
-**frontend/src/app/features/suivi-poulet/suivi-poulet-form/suivi-poulet-form.component.ts**
-- Formulaire de saisie d'un suivi hebdomadaire
-- Champs : nombre restant, poids moyen, ration, coût
-
-**frontend/src/app/features/suivi-poulet/mortalite-form/mortalite-form.component.ts**
-- Formulaire d'enregistrement de mortalité
-- Sélection lot, saisie nombre, date, notes
-
-**frontend/src/app/features/suivi-poulet/vente-poulet-form/vente-poulet-form.component.ts**
-- Formulaire d'enregistrement de vente de poulets
-- Sélection lot, saisie nombre, prix unitaire, date
-
-**Module Suivi Œufs**
-
-**frontend/src/app/features/suivi-oeuf/suivi-oeuf-list/suivi-oeuf-list.component.ts**
-- Liste des suivis de ponte pour un lot
-- Vue hebdomadaire
-
-**frontend/src/app/features/suivi-oeuf/suivi-oeuf-form/suivi-oeuf-form.component.ts**
-- Formulaire de saisie d'un suivi hebdomadaire de ponte
-- Champs : œufs par jour, œufs par semaine, taux de ponte
-
-**frontend/src/app/features/suivi-oeuf/production-oeuf-form/production-oeuf-form.component.ts**
-- Formulaire de saisie de production quotidienne
-- Sélection lot, saisie nombre d'œufs, date
-
-**frontend/src/app/features/suivi-oeuf/traitement-oeuf-form/traitement-oeuf-form.component.ts**
-- Formulaire de traitement des œufs
-- Choix : Vente (avec prix unitaire) ou Incubation
-- Saisie nombre d'œufs, date
-
-**Module Incubation**
-
-**frontend/src/app/features/incubation/incubation-list/incubation-list.component.ts**
-- Liste de toutes les incubations
-- Statut : en cours, terminée
-
-**frontend/src/app/features/incubation/incubation-detail/incubation-detail.component.ts**
-- Détail d'une incubation
-- Date début, date éclosion prévue, nombre d'œufs mis, résultats
-
-**frontend/src/app/features/incubation/incubation-form/incubation-form.component.ts**
-- Formulaire de création d'une incubation
-- Sélection lot source (optionnel), date début, type incubateur, nombre d'œufs
-
-**frontend/src/app/features/incubation/resultat-incubation-form/resultat-incubation-form.component.ts**
-- Formulaire de saisie des résultats d'éclosion
-- Nombre d'œufs éclos, taux de réussite
-- Option : créer un nouveau lot automatiquement
-
-**Module Production et Stock**
-
-**frontend/src/app/features/production/stock-view/stock-view.component.ts**
-- Vue du stock disponible
-- Œufs et poulets prêts à la vente
-- Valeur totale du stock
-
-**frontend/src/app/features/production/add-to-stock-form/add-to-stock-form.component.ts**
-- Formulaire d'ajout au stock
-- Sélection type (œufs/poulets), lot, quantité
-
-**Module Ventes**
-
-**frontend/src/app/features/ventes/vente-list/vente-list.component.ts**
-- Liste de toutes les ventes
-- Filtres : date, type (œufs/poulets)
-
-**frontend/src/app/features/ventes/vente-form/vente-form.component.ts**
-- Formulaire d'enregistrement d'une vente
-- Sélection stock disponible, quantité, prix unitaire, client
-
-**frontend/src/app/features/ventes/ca-view/ca-view.component.ts**
-- Vue du chiffre d'affaires
-- Filtres par période
-- Graphiques d'évolution
-
-**Module Achats et Dépenses**
-
-**frontend/src/app/features/achats/achat-list/achat-list.component.ts**
-- Liste de tous les achats
-- Filtres : catégorie (aliment, médicament, poussins), date
-
-**frontend/src/app/features/achats/achat-form/achat-form.component.ts**
-- Formulaire d'enregistrement d'un achat
-- Sélection catégorie, fournisseur, montant, date
-
-**frontend/src/app/features/achats/depenses-view/depenses-view.component.ts**
-- Vue des dépenses totales
-- Filtres par période
-- Répartition par catégorie
-
-**Module Prévisions**
-
-**frontend/src/app/features/previsions/prevision-list/prevision-list.component.ts**
-- Liste de toutes les prévisions
-- Statut : en attente, réalisée
-
-**frontend/src/app/features/previsions/prevision-form/prevision-form.component.ts**
-- Formulaire de création d'une prévision
-- Description, montant, date prévue, catégorie
-
-**frontend/src/app/features/previsions/budget-view/budget-view.component.ts**
-- Vue du budget prévisionnel
-- Comparaison prévu vs réalisé
-
-**Module Statistiques et Rapports**
-
-**frontend/src/app/features/statistiques/ca-chart/ca-chart.component.ts**
-- Graphique d'évolution du chiffre d'affaires
-- Utilisation de Chart.js ou ng2-charts
-
-**frontend/src/app/features/statistiques/benefice-chart/benefice-chart.component.ts**
-- Graphique d'évolution des bénéfices
-
-**frontend/src/app/features/statistiques/mortalite-chart/mortalite-chart.component.ts**
-- Graphique du taux de mortalité par lot
-
-**frontend/src/app/features/statistiques/ponte-chart/ponte-chart.component.ts**
-- Graphique de performance de ponte
-
-**frontend/src/app/features/statistiques/rapport-global/rapport-global.component.ts**
-- Rapport global de l'exploitation
-- Export PDF ou Excel
-
-### 3.6 Shared (Composants Partagés)
-
-**frontend/src/app/shared/components/header/header.component.ts**
-- En-tête de l'application
-- Menu de navigation
-- Informations utilisateur
-
-**frontend/src/app/shared/components/sidebar/sidebar.component.ts**
-- Barre latérale de navigation
-- Accès aux différents modules
-
-**frontend/src/app/shared/components/table/table.component.ts**
-- Composant tableau réutilisable
-- Tri, pagination, recherche
-
-**frontend/src/app/shared/components/chart/chart.component.ts**
-- Composant graphique réutilisable
-- Wrapper autour de Chart.js
-
-**frontend/src/app/shared/components/modal/modal.component.ts**
-- Composant modal réutilisable
-- Confirmation, alertes, formulaires
-
-**frontend/src/app/shared/components/loader/loader.component.ts**
-- Indicateur de chargement
-
-**frontend/src/app/shared/pipes/date-format.pipe.ts**
-- Pipe de formatage de dates
-- Format adapté au contexte malgache
-
-**frontend/src/app/shared/pipes/currency-ariary.pipe.ts**
-- Pipe de formatage de la monnaie Ariary
-
-**frontend/src/app/shared/pipes/unit-conversion.pipe.ts**
-- Pipe de conversion d'unités (g vers kg, etc)
-
-### 3.7 Styles et Assets
-
-**frontend/src/styles.scss**
-- Styles globaux de l'application
-- Variables SCSS (couleurs, polices, espacements)
-- Reset CSS
-
-**frontend/src/assets/images/**
-- Images et icônes de l'application
-
-**frontend/src/assets/fonts/**
-- Polices personnalisées
-
-### 3.8 Environnements
-
-**frontend/src/environments/environment.ts**
-- Configuration environnement développement
-- API URL : http://localhost:3000/api
-
-**frontend/src/environments/environment.prod.ts**
-- Configuration environnement production
-- API URL : URL du backend en production
-
-### 3.9 Packaging et Distribution
-
-**Icônes de l'Application**
-
-**frontend/build/icon.icns**
-- Icône pour macOS
-
-**frontend/build/icon.ico**
-- Icône pour Windows
-
-**frontend/build/icon.png**
-- Icône pour Linux
-
-**Scripts de Packaging**
-
-Le packaging est géré par electron-builder via les scripts npm :
-- npm run package-windows : Génère l'installateur Windows (.exe)
-- npm run package-linux : Génère le package Linux (.deb, .AppImage)
-- npm run package-mac : Génère l'application macOS (.dmg)
+### 2.8 Middlewares
+
+**`middlewares/error.middleware.ts`**
+- Handler global (dernier middleware Express)
+- Format uniforme : `{ success: false, message, code }`
+- Log serveur de l'erreur complète
+
+**`middlewares/logger.middleware.ts`**
+- Log de chaque requête : méthode, URL, statut, durée en ms
+
+**`middlewares/validation.middleware.ts`**
+- Validation des body/params avec Joi ou Zod
+- Retourne `400` avec message explicite si invalide
+- Un schéma de validation par DTO
+
+---
+
+### 2.9 Utilitaires
+
+**`utils/logger.ts`** — Winston : niveaux error/warn/info/debug, rotation des fichiers de log
+
+**`utils/response.ts`** — Format uniforme :
+```
+Succès  : { success: true, data: T, message?: string }
+Erreur  : { success: false, message: string, code?: string }
+```
+
+**`utils/date.ts`** — Âge en semaines, différence dates, formatage ISO/local
+
+**`utils/conversion.ts`** — Conversion d'unités via facteurs de la table `Unite`
+
+---
+
+### 2.10 Point d'Entrée Express — `app.ts`
+
+- Instancie Express
+- Middlewares globaux : `cors`, `helmet`, `express.json()`, logger
+- Toutes les routes via `routes/index.ts`
+- Handler 404 pour routes inconnues
+- Handler d'erreurs global
+- Connexion BDD au démarrage avec log clair
+- Arrêt gracieux `SIGINT`/`SIGTERM` → `closePool()`
+
+---
+
+### 2.11 Validation Après Chaque Module
+
+> Tester avec REST Client (VS Code) ou Postman immédiatement après avoir codé chaque module.
+
+- [ ] GET → données au bon format
+- [ ] POST valide → `201` + entité créée
+- [ ] POST invalide → `400` + message clair
+- [ ] GET /:id inexistant → `404`
+- [ ] Jamais de stack trace en réponse — toujours du JSON
+
+---
+
+## PHASE 3 : FRONTEND ANGULAR + ELECTRON
+
+> **Prérequis :** Backend fonctionnel (phases 2.2 à 2.10 terminées) avant de démarrer le frontend.
+
+### 3.1 Initialisation du Projet
+
+```bash
+cd frontend
+ng new akoho-app --routing --style=scss --skip-git
+npm install --save-dev electron electron-builder
+npm install --save-dev concurrently wait-on
+```
+
+- [ ] `angular.json` : output vers `dist/` pour Electron
+- [ ] `electron/main.ts` — process principal (création fenêtre, cycle de vie)
+- [ ] `electron/preload.ts` — bridge sécurisé (`contextIsolation: true`)
+- [ ] Scripts `package.json` :
+  - `"dev"` : Angular dev server seul
+  - `"electron:dev"` : Angular + Electron en parallèle (concurrently + wait-on)
+  - `"electron:build"` : build Angular + package Electron
+- [ ] `electron-builder.yml` : cible Windows, icône, fichiers inclus
+
+### 3.2 Structure Frontend
+
+```
+frontend/
+├── electron/
+│   ├── main.ts              ← Gestion fenêtre, menu, cycle de vie
+│   └── preload.ts           ← API exposées au renderer
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── services/    ← Appels HTTP vers le backend
+│   │   │   └── models/      ← Interfaces TypeScript (miroir backend)
+│   │   ├── features/        ← Un dossier par module fonctionnel
+│   │   │   ├── dashboard/
+│   │   │   ├── lots/
+│   │   │   ├── suivi-poulet/
+│   │   │   ├── suivi-oeuf/
+│   │   │   ├── incubation/
+│   │   │   ├── production/
+│   │   │   ├── ventes/
+│   │   │   ├── achats/
+│   │   │   ├── previsions/
+│   │   │   └── statistiques/
+│   │   └── shared/          ← Composants et pipes réutilisables
+│   ├── environments/
+│   │   ├── environment.ts          ← apiUrl: 'http://localhost:3000/api'
+│   │   └── environment.prod.ts
+│   └── styles.scss
+└── electron-builder.yml
+```
+
+### 3.3 Core — Services HTTP
+
+- **`core/services/api.service.ts`** — HttpClient wrapper, gestion erreurs centralisée
+- **`core/services/electron.service.ts`** — Interface API natives Electron (IPC, dialogs, notifications)
+- **`core/services/reference.service.ts`** — Chargement unique au démarrage, mise en cache
+- **`core/services/lot.service.ts`** — `getAll`, `getById`, `getActifs`, `create`, `update`, `delete`
+- **`core/services/incubation.service.ts`** — `getAll`, `getById`, `create`, `updateResultat`
+- **`core/services/suivi-poulet.service.ts`** — `getByLot`, `create`, `update`, `recordMortalite`, `recordVente`
+- **`core/services/suivi-oeuf.service.ts`** — `getByLot`, `create`, `recordProduction`, `traitementOeufs`
+- **`core/services/production.service.ts`** — `getStock`, `getValeur`, `addToStock`
+- **`core/services/vente.service.ts`** — `getAll`, `getCA`, `create`
+- **`core/services/achat.service.ts`** — `getAll`, `getDepenses`, `create`
+- **`core/services/prevision.service.ts`** — `getAll`, `getBudget`, `create`, `markAsRealized`
+- **`core/services/dashboard.service.ts`** — `getDashboardData`, `getSynthese`
+- **`core/services/statistiques.service.ts`** — `getCA`, `getBenefices`, `getMortalite`, `getPonte`
+
+### 3.4 Core — Modèles TypeScript
+
+> Miroir exact des interfaces backend. Si le backend change, le frontend change aussi.
+
+`core/models/lot.model.ts` · `core/models/incubation.model.ts` · `core/models/suivi-poulet.model.ts`
+`core/models/suivi-oeuf.model.ts` · `core/models/traitement-oeufs.model.ts`
+`core/models/production.model.ts` · `core/models/vente.model.ts` · `core/models/achat.model.ts`
+`core/models/prevision.model.ts` · `core/models/reference.model.ts` (Sexe, Race, TypeProd, etc.)
+
+### 3.5 Features — Modules Fonctionnels
+
+#### Dashboard *(vue principale)*
+**`features/dashboard/dashboard.component`**
+- Tableau récap par lot : Lot · Nb Akoho · Achat · Sakafo · Maty · Poids Moyen · Prix Vente · Nb Atody · Prix Atody · Bénéfice
+- Filtres par date (dateDebut / dateFin)
+- Indicateurs clés : CA total, bénéfice total, nb lots actifs
+
+#### Gestion des Lots
+- **`lot-list`** — filtres statut/race/type, recherche par code
+- **`lot-form`** — création/modification : race, type, date éclosion, InitialCount, mâles/femelles
+- **`lot-detail`** — infos + historique suivis + graphiques évolution
+
+#### Suivi Poulets
+- **`suivi-poulet-list`** — vue hebdomadaire d'un lot
+- **`suivi-poulet-form`** — nb restant, poids moyen, ration, coût
+- **`mortalite-form`** — lot, nb morts, date, notes
+- **`vente-poulet-form`** — lot, nb vendus, prix unitaire, date
+
+#### Suivi Œufs
+- **`suivi-oeuf-list`** — vue hebdomadaire de ponte
+- **`suivi-oeuf-form`** — œufs/jour, œufs/semaine, taux de ponte
+- **`production-oeuf-form`** — production quotidienne : lot, nb œufs, date
+- **`traitement-oeuf-form`** — choix Vente (prix unitaire) ou Incubation, nb œufs, date
+
+#### Incubation
+- **`incubation-list`** — statut en cours / terminée
+- **`incubation-detail`** — date début, date éclosion prévue, nb œufs, résultats
+- **`incubation-form`** — lot source (optionnel), date début, type incubateur, nb œufs
+- **`resultat-incubation-form`** — nb éclos, taux réussite, option créer nouveau lot
+
+#### Production et Stock
+- **`stock-view`** — stock actuel (œufs + poulets), valeur totale
+- **`add-to-stock-form`** — type, lot, quantité
+
+#### Ventes
+- **`vente-list`** — filtres date/type
+- **`vente-form`** — sélection stock, quantité, prix unitaire, client
+- **`ca-view`** — CA par période + graphique d'évolution
+
+#### Achats et Dépenses
+- **`achat-list`** — filtres catégorie et date
+- **`achat-form`** — catégorie, fournisseur, montant, date
+- **`depenses-view`** — total par période, répartition par catégorie
+
+#### Prévisions
+- **`prevision-list`** — statut en attente / réalisée
+- **`prevision-form`** — description, montant, date prévue, catégorie
+- **`budget-view`** — comparaison prévu vs réalisé
+
+#### Statistiques et Rapports
+- **`ca-chart`** — CA mensuel (Chart.js / ng2-charts)
+- **`benefice-chart`** — bénéfices par lot et par période
+- **`mortalite-chart`** — taux de mortalité par lot
+- **`ponte-chart`** — performance de ponte hebdomadaire
+- **`rapport-global`** — rapport complet, export PDF/Excel
+
+### 3.6 Shared — Composants Réutilisables
+
+- **`shared/components/header`** — en-tête, menu principal
+- **`shared/components/sidebar`** — navigation latérale vers tous les modules
+- **`shared/components/table`** — tableau générique : tri, pagination, recherche
+- **`shared/components/chart`** — wrapper Chart.js réutilisable
+- **`shared/components/modal`** — dialogs confirmation / alertes / formulaires
+- **`shared/components/loader`** — indicateur de chargement
+- **`shared/components/toast`** — notifications succès/erreur non bloquantes
+- **`shared/pipes/currency-ariary.pipe.ts`** — formatage Ariary (ex: `12 500 Ar`)
+- **`shared/pipes/date-format.pipe.ts`** — formatage date adapté au contexte malgache
+- **`shared/pipes/unit-conversion.pipe.ts`** — conversion g → kg selon table Unite
+
+### 3.7 Assets et Styles
+
+- **`src/styles.scss`** — variables SCSS globales (couleurs, typo, espacements), reset CSS
+- **`src/assets/images/`** — logo, icônes
+- **`src/assets/fonts/`** — polices personnalisées si nécessaire
+
+### 3.8 Packaging Electron
+
+- **`frontend/build/icon.ico`** — icône Windows
+- **`frontend/build/icon.png`** — icône Linux
+- `npm run package-windows` → installateur `.exe`
 
 ---
 
 ## PHASE 4 : INTÉGRATION ET TESTS
 
-### 4.1 Intégration Backend-Frontend
+### 4.1 Tests Backend par Module
 
-**Communication via API REST**
-- [ ] Vérifier que tous les endpoints backend sont fonctionnels
-- [ ] Tester chaque appel API depuis le frontend
-- [ ] Gérer les erreurs réseau et timeouts
-- [ ] Implémenter retry logic si nécessaire
+> Tester **après chaque module**, pas à la fin de tout.
 
-**IPC Electron**
-- [ ] Définir les canaux IPC pour communication main-renderer
-- [ ] Implémenter les handlers côté main process
-- [ ] Tester la communication bidirectionnelle
+Pour chaque endpoint :
+- [ ] Cas nominal (données valides) → succès + bon format
+- [ ] Données manquantes → `400` avec message explicite
+- [ ] ID inexistant → `404`
+- [ ] Violation règle métier → `422` ou `400` avec message métier
+- [ ] Toujours une réponse JSON, jamais une stack trace
 
-### 4.2 Tests Unitaires
+### 4.2 Tests Frontend
 
-**Backend**
-- [ ] Tests des repositories : vérifier les requêtes SQL
-- [ ] Tests des services : vérifier la logique métier
-- [ ] Tests des controllers : vérifier les réponses HTTP
-- [ ] Coverage minimum : 70%
+- [ ] Chaque appel HTTP affiche les bonnes données dans l'UI
+- [ ] Les formulaires valident côté client avant envoi
+- [ ] Les erreurs API sont affichées à l'utilisateur (toast ou message inline)
+- [ ] Les états de chargement sont visibles (loader)
 
-**Frontend**
-- [ ] Tests des services : vérifier les appels HTTP
-- [ ] Tests des composants : vérifier le rendu et les interactions
-- [ ] Tests des pipes : vérifier les transformations
-- [ ] Coverage minimum : 60%
+### 4.3 Scénarios End-to-End à Valider
 
-### 4.3 Tests d'Intégration
+- [ ] Créer un nouveau lot → apparaît dans la liste et le dashboard
+- [ ] Enregistrer un suivi hebdomadaire → visible dans le détail du lot
+- [ ] Enregistrer une mortalité → effectif du lot mis à jour
+- [ ] Vendre des poulets → stock mis à jour, vente dans l'historique
+- [ ] Créer une incubation → date éclosion calculée automatiquement
+- [ ] Saisir résultat d'éclosion → taux calculé, option nouveau lot
+- [ ] Consulter le dashboard → tous les indicateurs cohérents entre eux
+- [ ] Générer un rapport → données correctes, export fonctionnel
 
-**Backend**
-- [ ] Tests des endpoints API avec supertest
-- [ ] Tests des transactions base de données
-- [ ] Tests des calculs complexes
-- [ ] Tests de performance et charge
+### 4.4 Tests Utilisateurs
 
-**Frontend**
-- [ ] Tests de navigation entre les pages
-- [ ] Tests de soumission de formulaires
-- [ ] Tests de mise à jour en temps réel
-
-### 4.4 Tests End-to-End
-
-**Scénarios Utilisateur**
-- [ ] Créer un nouveau lot
-- [ ] Enregistrer un suivi hebdomadaire
-- [ ] Enregistrer une mortalité
-- [ ] Enregistrer une vente de poulets
-- [ ] Créer une incubation
-- [ ] Enregistrer des résultats d'éclosion
-- [ ] Consulter le dashboard avec filtres
-- [ ] Générer un rapport de statistiques
-
-**Outils**
-- Playwright ou Spectron pour tests E2E Electron
-
-### 4.5 Tests Utilisateurs
-
-**Alpha Testing**
-- [ ] Tests internes avec données fictives
-- [ ] Validation des fonctionnalités principales
-- [ ] Correction des bugs critiques
-
-**Beta Testing**
-- [ ] Tests avec utilisateurs réels (éleveurs)
-- [ ] Recueil de feedback
-- [ ] Ajustements ergonomiques
+**Alpha** — Tests internes avec données fictives, correction des bugs critiques
+**Beta** — Tests avec éleveurs réels, recueil de feedback, ajustements ergonomiques
 
 ---
 
-## PHASE 5 : VERSIONING ET DÉPLOIEMENT
+## PHASE 5 : VERSIONING ET PACKAGING
 
-### 5.1 Gestion du Code Source avec GitHub
+### 5.1 Git et GitHub
 
-**Initialisation du Repository**
+- [ ] `git init` à la racine si pas encore fait
+- [ ] Premier commit propre de l'état actuel
+- [ ] Branches : `main` (stable) · `develop` (en cours)
+- [ ] Travailler sur `feature/nom-feature` depuis `develop`
 
-**Fichier : .gitignore**
-- Exclusions : node_modules, dist, build, .env, logs, coverage
+**Fichiers de documentation :**
+- `README.md` — description, prérequis, installation, lancement
+- `CHANGELOG.md` — historique des versions
+- `docs/user-guide.md` — guide utilisateur avec captures d'écran
+- `docs/troubleshooting.md` — problèmes courants et solutions
 
-**Fichier : README.md**
-- Description du projet
-- Instructions d'installation
-- Guide de contribution
-- Captures d'écran
+### 5.2 Convention de Commits
 
-**Fichier : CHANGELOG.md**
-- Historique des versions
-- Liste des nouvelles fonctionnalités, corrections, améliorations
+```
+feat(lot): ajouter validation du nombre initial
+fix(suivi-poulet): corriger calcul du poids moyen
+refactor(dashboard): extraire logique dans service dédié
+docs(readme): mettre à jour instructions d'installation
+test(lot): ajouter tests unitaires du service
+```
 
-**Fichier : CONTRIBUTING.md**
-- Guide de contribution pour les développeurs
-- Conventions de code, processus de PR
+Types : `feat` · `fix` · `refactor` · `docs` · `test` · `chore` · `style`
 
-**Fichier : LICENSE**
-- Licence du projet (MIT, GPL, propriétaire)
+### 5.3 Versioning Sémantique
 
-### 5.2 Structure des Branches
+`MAJOR.MINOR.PATCH`
+- `MAJOR` : breaking changes · `MINOR` : nouvelles fonctionnalités · `PATCH` : corrections de bugs
 
-**Branches principales**
-- main : Code en production, stable
-- develop : Code en développement, intégration des features
+### 5.4 CI/CD GitHub Actions *(optionnel mais recommandé)*
 
-**Branches de fonctionnalités**
-- feature/nom-fonctionnalite : Développement d'une nouvelle fonctionnalité
-- bugfix/nom-bug : Correction d'un bug
-- hotfix/nom-hotfix : Correction urgente en production
+- **`.github/workflows/ci.yml`** — sur push/PR : lint + build + tests
+- **`.github/workflows/release.yml`** — sur tag `v*` : packaging Windows + upload artifacts
 
-**Workflow**
-- Créer une branche depuis develop
-- Développer et commiter régulièrement
-- Créer une Pull Request vers develop
-- Révision de code par un pair
-- Merge après validation
-- Périodiquement : merge develop vers main pour release
+### 5.5 Packaging Final
 
-### 5.3 Conventions de Commit
-
-**Format des messages**
-- Type : feat, fix, docs, style, refactor, test, chore
-- Scope : module concerné (lot, incubation, dashboard)
-- Message : description claire et concise
-
-**Exemples**
-- feat(lot): ajouter validation du nombre initial
-- fix(suivi-poulet): corriger calcul du poids moyen
-- docs(readme): mettre à jour instructions d'installation
-
-### 5.4 CI/CD (Continuous Integration / Continuous Deployment)
-
-**GitHub Actions**
-
-**Fichier : .github/workflows/ci.yml**
-- Déclenchement : sur push et pull request
-- Jobs : lint, build, test
-- Environnements : Node.js, TypeScript, Jest
-
-**Fichier : .github/workflows/release.yml**
-- Déclenchement : sur tag (v1.0.0)
-- Jobs : build, package (Windows, macOS, Linux), upload artifacts
-- Publication sur GitHub Releases
-
-### 5.5 Versioning Sémantique
-
-**Format : MAJOR.MINOR.PATCH**
-- MAJOR : Changements incompatibles (breaking changes)
-- MINOR : Nouvelles fonctionnalités compatibles
-- PATCH : Corrections de bugs
-
-**Exemple**
-- v1.0.0 : Version initiale stable
-- v1.1.0 : Ajout module statistiques
-- v1.1.1 : Correction bug dashboard
-
-### 5.6 Packaging de l'Application Desktop
-
-**Configuration electron-builder**
-- Création d'installateurs natifs pour chaque plateforme
-- Signature de code (Windows, macOS)
-- Auto-update configuré
-
-**Artefacts générés**
-- Windows : .exe (installateur), .zip (portable)
-- macOS : .dmg (image disque)
-- Linux : .deb (Debian/Ubuntu), .AppImage (universel)
-
-### 5.7 Distribution
-
-**GitHub Releases**
-- Créer une release pour chaque version
-- Attacher les artefacts (installateurs)
-- Rédiger les notes de version
-
-**Mise à jour automatique**
-- Implémenter electron-updater
-- Vérifier les mises à jour au démarrage
-- Télécharger et installer en arrière-plan
-- Notifier l'utilisateur
-
-### 5.8 Documentation Utilisateur
-
-**Fichier : docs/user-guide.md**
-- Guide d'utilisation complet
-- Captures d'écran
-- FAQ
-
-**Fichier : docs/installation.md**
-- Instructions d'installation par plateforme
-- Configuration requise
-
-**Fichier : docs/troubleshooting.md**
-- Problèmes courants et solutions
+- [ ] `electron-builder.yml` configuré (appId, nom, icône, fichiers inclus)
+- [ ] `npm run package-windows` → génère `.exe`
+- [ ] Tester l'installateur sur machine sans Node.js
+- [ ] GitHub Release avec artefact attaché
 
 ---
 
 ## BONNES PRATIQUES DE REPRISE DE CODE
 
-### 1. Analyse Initiale
+### 1 — Lire avant d'écrire
+Lire tout le code existant avant de modifier quoi que ce soit.
+Se demander *"Pourquoi c'est fait comme ça ?"* avant *"Comment je vais changer ça ?"*
 
-**Avant de coder**
-- Lire toute la documentation disponible
-- Analyser le schéma de base de données
-- Identifier les concepts métier clés
-- Comprendre les règles de gestion
-- Cartographier l'architecture technique
+### 2 — Fonctionnel d'abord, propre ensuite
+Si le code fonctionne, le laisser jusqu'à la fin du module.
+Refactoriser une fois que tout marche → moins de régression.
 
-### 2. Documentation
+### 3 — Tester après chaque ajout
+Chaque endpoint ajouté → test Postman / REST Client immédiat.
+Ne pas attendre d'avoir tout codé pour tester.
 
-**Documenter au fur et à mesure**
-- Commenter le code de manière claire et concise
-- Créer un glossaire des termes métier
-- Documenter les décisions techniques importantes
-- Tenir un journal de bord des avancées et blocages
+### 4 — Commiter régulièrement
+Un commit = un changement logique cohérent.
+Pas de commits de 500 lignes. Si tu te perds, `git stash` et recommence proprement.
 
-### 3. Tests
+### 5 — Commenter le pourquoi, pas le quoi
 
-**Tester régulièrement**
-- Écrire des tests unitaires pour chaque fonction critique
-- Tester les endpoints API avec Postman ou Insomnia
-- Tester les cas limites et les erreurs
-- Faire des tests de régression après chaque modification
+```typescript
+// ❌ Inutile — décrit ce qu'on lit déjà
+const total = maleCount + femaleCount;
 
-### 4. Itération
+// ✅ Utile — explique la règle métier
+// La règle impose mâles + femelles <= effectif initial (contrainte BDD)
+if (maleCount + femaleCount > initialCount) throw new Error('...');
+```
 
-**Développement incrémental**
-- Commencer par les fonctionnalités de base
-- Faire fonctionner avant d'optimiser
-- Refactorer quand le code devient complexe
-- Valider chaque étape avant de passer à la suivante
+### 6 — Requêtes SQL toujours paramétrées
 
-### 5. Versioning
+```typescript
+// ❌ Dangereux — injection SQL possible
+`SELECT * FROM elevage.Lot WHERE LotCode = '${code}'`
 
-**Utiliser Git efficacement**
-- Commiter régulièrement avec des messages clairs
-- Créer des branches pour chaque fonctionnalité
-- Faire des pull requests pour révision
-- Garder un historique propre et lisible
+// ✅ Sécurisé
+request.input('code', sql.NVarChar, code);
+`SELECT * FROM elevage.Lot WHERE LotCode = @code`
+```
 
-### 6. Collaboration
+### 7 — Variables d'environnement
+`.env` → **jamais dans Git** · lire depuis `process.env` · `.env.example` toujours à jour
 
-**Si travail en équipe**
-- Définir des conventions de code
-- Faire des revues de code systématiques
-- Partager les connaissances via documentation
-- Communiquer régulièrement sur les avancées
-
-### 7. Suivi de Progression
-
-**Checklist quotidienne**
-- Quelles tâches ai-je accomplies aujourd'hui ?
-- Quelles difficultés ai-je rencontrées ?
-- Qu'ai-je appris ?
-- Quelle est ma prochaine priorité ?
-
-### 8. Performance et Optimisation
-
-**Optimiser quand nécessaire**
-- Profiler l'application pour identifier les goulots d'étranglement
-- Optimiser les requêtes SQL (index, jointures)
-- Lazy loading pour le frontend
-- Mise en cache des données fréquemment utilisées
-
-### 9. Sécurité
-
-**Bonnes pratiques de sécurité**
-- Ne jamais exposer les mots de passe ou clés API
-- Valider toutes les entrées utilisateur
-- Utiliser des requêtes paramétrées pour éviter les injections SQL
-- Chiffrer les données sensibles
-- Gérer les permissions et accès
-
-### 10. Maintenance
-
-**Préparer la maintenance future**
-- Écrire du code lisible et maintenable
-- Éviter la duplication de code
-- Respecter les principes SOLID
-- Prévoir des logs pour faciliter le debugging
+### 8 — Journal de bord quotidien
+À la fin de chaque session, noter en 3 lignes :
+1. Ce qui a été fait
+2. Ce qui a bloqué
+3. La prochaine étape prioritaire
 
 ---
 
-## PLANNING SUGGÉRÉ
-
-### Semaine 1 : Setup Environnement
-- Jour 1 : Installation Docker, configuration docker-compose
-- Jour 2 : Lancement des conteneurs, test connexion SQL Server
-- Jour 3 : Initialisation base de données, insertion données de référence
-- Jour 4-5 : Mise en place de GitHub, structure projet backend
-
-### Semaine 2 : Backend - Fondations
-- Jour 1-2 : Création des modèles et repositories de référence
-- Jour 3-4 : Création des modèles et repositories métier
-- Jour 5 : Tests de connexion et requêtes SQL
-
-### Semaine 3 : Backend - Logique Métier
-- Jour 1-2 : Implémentation des services métier
-- Jour 3-4 : Implémentation des services commerciaux
-- Jour 5 : Tests unitaires des services
-
-### Semaine 4 : Backend - API
-- Jour 1-2 : Création des controllers et routes
-- Jour 3-4 : Middlewares et gestion erreurs
-- Jour 5 : Tests des endpoints avec Postman
-
-### Semaine 5 : Frontend - Setup Electron
-- Jour 1-2 : Configuration Electron, création process main
-- Jour 3-4 : Setup Angular, création services HTTP
-- Jour 5 : Tests IPC et communication backend
-
-### Semaine 6 : Frontend - Dashboard
-- Jour 1-2 : Création du dashboard principal
-- Jour 3-4 : Implémentation des filtres et calculs
-- Jour 5 : Stylisation et responsive design
-
-### Semaine 7 : Frontend - Gestion Lots
-- Jour 1-2 : Liste des lots, filtres, recherche
-- Jour 3-4 : Formulaire de création/modification
-- Jour 5 : Détail d'un lot, graphiques d'évolution
-
-### Semaine 8 : Frontend - Suivi Poulets
-- Jour 1-2 : Suivi hebdomadaire, formulaires
-- Jour 3-4 : Enregistrement mortalité et vente
-- Jour 5 : Tests et validation
-
-### Semaine 9 : Frontend - Suivi Œufs et Incubation
-- Jour 1-2 : Suivi ponte, production quotidienne
-- Jour 3-4 : Traitement œufs, gestion incubation
-- Jour 5 : Tests et validation
-
-### Semaine 10 : Frontend - Gestion Commerciale
-- Jour 1-2 : Production et stock
-- Jour 3-4 : Ventes et achats
-- Jour 5 : Prévisions et budget
-
-### Semaine 11 : Frontend - Statistiques et Rapports
-- Jour 1-2 : Graphiques CA et bénéfices
-- Jour 3-4 : Graphiques mortalité et ponte
-- Jour 5 : Rapport global, export
-
-### Semaine 12 : Tests et Finalisation
-- Jour 1-2 : Tests d'intégration complets
-- Jour 3 : Tests end-to-end
-- Jour 4 : Corrections de bugs
-- Jour 5 : Documentation utilisateur
-
-### Semaine 13 : Packaging et Déploiement
-- Jour 1-2 : Configuration electron-builder, packaging
-- Jour 3 : Tests des installateurs sur différentes plateformes
-- Jour 4 : Configuration CI/CD GitHub Actions
-- Jour 5 : Première release, documentation finale
-
----
-
-## RESSOURCES ET DOCUMENTATION
-
-### SQL Server
-- Microsoft SQL Server Documentation
-- T-SQL Reference
-- SQL Server Management Studio (SSMS) Guide
-
-### Node.js et Express
-- Node.js Official Documentation
-- Express.js Guide
-- TypeScript Handbook
-
-### Electron
-- Electron Official Documentation
-- Electron Builder Documentation
-- Electron IPC Guide
-
-### Angular
-- Angular Official Documentation
-- Angular Material Design Components
-- RxJS Documentation
-
-### Outils Recommandés
-- IDE : Visual Studio Code
-- Extensions VS Code : Docker, Remote - Containers, ESLint, Prettier
-- Client SQL : Azure Data Studio, DBeaver
-- API Testing : Postman, Insomnia
-- Git GUI : GitKraken, SourceTree
-- Design : Figma, Adobe XD (pour maquettes)
-
-### Bibliothèques Utiles
-- Backend : Winston (logging), Joi (validation), Jest (tests)
-- Frontend : Chart.js (graphiques), date-fns (manipulation dates), lodash (utilitaires)
-
----
-
-##  AIDE ET RESSOURCES
-
-### Documentation SQL Server
-- [Microsoft SQL Server Docs](https://docs.microsoft.com/sql/sql-server/)
-- [T-SQL Reference](https://docs.microsoft.com/sql/t-sql/)
-
-### Documentation Node.js
-- [Node.js Official Docs](https://nodejs.org/docs/)
-- [Express.js Guide](https://expressjs.com/guide/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-
-### Documentation Angular
-- [Angular Official Docs](https://angular.io/docs)
-- [Angular Material](https://material.angular.io/)
-
-### Outils Recommandés
-- **IDE** : Visual Studio Code
-- **Client SQL** : Azure Data Studio / DBeaver
-- **API Testing** : Postman / Insomnia
-- **Git GUI** : GitKraken / SourceTree
-
----
-
-##  PROCHAINES ÉTAPES
-
-Maintenant que vous avez cette TODO restructurée :
-
-1. **Lisez-la entièrement** pour avoir une vue d'ensemble
-2. **Posez-moi des questions** sur les parties que vous ne comprenez pas
-3. **Choisissez par où commencer** (je recommande Phase 1.1 - SQL Server)
-4. **Avancez pas à pas** en cochant les tâches accomplies
-
-**Je suis là pour vous guider à chaque étape ! **
-
-Dites-moi :
-- Quelle partie vous semble la plus difficile ?
-- Par quoi voulez-vous commencer ?
-- Avez-vous des questions sur le domaine métier ?
