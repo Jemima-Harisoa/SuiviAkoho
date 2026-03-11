@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { getPool } from './config/database.config';
+import raceRoutes from './routes/race.routes';
+
+
 
 dotenv.config();
 
@@ -13,6 +16,10 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes Race
+app.use('/api/races', raceRoutes); 
 
 // Route de test
 app.get('/health', async (req, res) => {
@@ -39,3 +46,4 @@ app.listen(PORT, async () => {
     console.error('Impossible de se connecter à la DB:', error);
   }
 });
+

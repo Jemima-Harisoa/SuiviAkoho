@@ -10,3 +10,9 @@ npm install -D typescript ts-node nodemon @types/express @types/node @types/cors
 
 ## Installation de typescript globalement
 npx tsc --init
+
+# Initialisation du frontend
+## Création du projet React
+npx @angular/cli@20 new frontend --skip-git --style=scss --routing --standalone --package-manager npm --defaults
+
+## 

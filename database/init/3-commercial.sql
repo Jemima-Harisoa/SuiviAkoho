@@ -7,7 +7,6 @@
 	- HistoriqueAchat
 
   Note:
-	- Aucune table n'utilise de prefixe de schema (pas de elevage.)
 	- Ce fichier contient aussi des donnees de test commerciales.
 */
 
