@@ -9,4 +9,4 @@ backend/node_modules/*
 backend/.env
 
 # fichier volumineux frontend
-frontend/*
+frontend/node_modules/*
