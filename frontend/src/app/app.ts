@@ -1,12 +1,23 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, ViewChild } from '@angular/core';
+import { ListComponent } from './components/race/list/list';
+import { FormComponent } from './components/race/form/form';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [ListComponent, FormComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('frontend');
+  @ViewChild(ListComponent) listComponent!: ListComponent;
+
+  title = 'SuiviAkoho';
+
+  onRaceCreated(): void {
+    // Refresh the list after a new race is created
+    if (this.listComponent) {
+      this.listComponent.loadRaces();
+    }
+  }
 }

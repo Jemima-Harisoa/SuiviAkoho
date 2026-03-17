@@ -1,1 +1,47 @@
-<p>form works!</p>
+<div class="race-form-container">
+  <h2>Ajouter une Race</h2>
+
+  <div *ngIf="message" [class]="'message ' + messageType">
+    {{ message }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="race-form">
+    <div class="form-group">
+      <label for="name">Nom de la race *</label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        placeholder="Ex: Poule Sussex"
+        class="form-input"
+      />
+      <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="error-text">
+        <span *ngIf="form.get('name')?.errors?.['required']">Le nom est requis</span>
+        <span *ngIf="form.get('name')?.errors?.['minlength']">Le nom doit avoir au moins 3 caractères</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descriptionJson">Description JSON</label>
+      <textarea
+        id="descriptionJson"
+        formControlName="descriptionJson"
+        rows="10"
+        placeholder='Entrez un JSON valide, ex: {"origine":"France","type":"pondeuse"}'
+        class="form-input"
+      ></textarea>
+      <div *ngIf="form.get('descriptionJson')?.invalid && form.get('descriptionJson')?.touched" class="error-text">
+        <span>Veuillez entrer un JSON valide</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="!form.valid || loading" class="btn btn-primary">
+        {{ loading ? 'Création en cours...' : 'Créer la race' }}
+      </button>
+      <button type="button" (click)="resetForm()" class="btn btn-secondary">
+        Réinitialiser
+      </button>
+    </div>
+  </form>
+</div>

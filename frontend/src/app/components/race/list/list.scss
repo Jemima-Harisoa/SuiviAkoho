@@ -1,0 +1,68 @@
+.race-list-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+}
+
+.loading,
+.error {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.loading {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+
+  thead {
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    color: #666;
+    font-size: 14px;
+  }
+
+  tbody tr {
+    &:hover {
+      background-color: #fafafa;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
