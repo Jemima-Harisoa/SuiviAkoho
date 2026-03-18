@@ -1,0 +1,226 @@
+import { getPool } from '../config/database.config';
+import { Lot, CreateLotDTO, UpdateLotDTO } from '../models/lot.model';
+import sql from 'mssql';
+
+export async function findAll(): Promise<Lot[]> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .query(`SELECT 
+      LotId AS lotId,
+      LotCode AS lotCode,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId,
+      SexeId AS sexeId,
+      StartDate AS startDate,
+      InitialCount AS initialCount,
+      MaleCount AS maleCount,
+      FemaleCount AS femaleCount,
+      Status AS status,
+      Notes AS notes,
+      CreatedAt AS createdAt,
+      UpdatedAt AS updatedAt
+      FROM elevage.Lot
+      ORDER BY CreatedAt DESC`);
+  
+  return result.recordset;
+}
+
+export async function findById(lotId: number): Promise<Lot | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, lotId)
+    .query(`SELECT 
+      LotId AS lotId,
+      LotCode AS lotCode,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId,
+      SexeId AS sexeId,
+      StartDate AS startDate,
+      InitialCount AS initialCount,
+      MaleCount AS maleCount,
+      FemaleCount AS femaleCount,
+      Status AS status,
+      Notes AS notes,
+      CreatedAt AS createdAt,
+      UpdatedAt AS updatedAt
+      FROM elevage.Lot
+      WHERE LotId = @id`);
+  
+  return result.recordset[0] ?? null;
+}
+
+export async function findByCode(lotCode: string): Promise<Lot | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('code', sql.NVarChar(50), lotCode)
+    .query(`SELECT 
+      LotId AS lotId,
+      LotCode AS lotCode,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId,
+      SexeId AS sexeId,
+      StartDate AS startDate,
+      InitialCount AS initialCount,
+      MaleCount AS maleCount,
+      FemaleCount AS femaleCount,
+      Status AS status,
+      Notes AS notes,
+      CreatedAt AS createdAt,
+      UpdatedAt AS updatedAt
+      FROM elevage.Lot
+      WHERE LotCode = @code`);
+  
+  return result.recordset[0] ?? null;
+}
+
+export async function findByStatus(status: string): Promise<Lot[]> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('status', sql.NVarChar(20), status)
+    .query(`SELECT 
+      LotId AS lotId,
+      LotCode AS lotCode,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId,
+      SexeId AS sexeId,
+      StartDate AS startDate,
+      InitialCount AS initialCount,
+      MaleCount AS maleCount,
+      FemaleCount AS femaleCount,
+      Status AS status,
+      Notes AS notes,
+      CreatedAt AS createdAt,
+      UpdatedAt AS updatedAt
+      FROM elevage.Lot
+      WHERE Status = @status
+      ORDER BY CreatedAt DESC`);
+  
+  return result.recordset;
+}
+
+export async function findByRace(raceId: number): Promise<Lot[]> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('raceId', sql.Int, raceId)
+    .query(`SELECT 
+      LotId AS lotId,
+      LotCode AS lotCode,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId,
+      SexeId AS sexeId,
+      StartDate AS startDate,
+      InitialCount AS initialCount,
+      MaleCount AS maleCount,
+      FemaleCount AS femaleCount,
+      Status AS status,
+      Notes AS notes,
+      CreatedAt AS createdAt,
+      UpdatedAt AS updatedAt
+      FROM elevage.Lot
+      WHERE RaceId = @raceId
+      ORDER BY CreatedAt DESC`);
+  
+  return result.recordset;
+}
+
+export async function create(data: CreateLotDTO): Promise<Lot> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('code', sql.NVarChar(50), data.lotCode)
+    .input('raceId', sql.Int, data.raceId)
+    .input('typeProductionId', sql.Int, data.typeProductionId)
+    .input('sexeId', sql.Int, data.sexeId ?? null)
+    .input('startDate', sql.Date, data.startDate)
+    .input('initialCount', sql.Int, data.initialCount)
+    .input('maleCount', sql.Int, data.maleCount)
+    .input('femaleCount', sql.Int, data.femaleCount)
+    .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
+    .query(`INSERT INTO elevage.Lot 
+      (LotCode, RaceId, TypeProductionId, SexeId, StartDate, InitialCount, MaleCount, FemaleCount, Status, Notes, CreatedAt, UpdatedAt)
+      OUTPUT
+        INSERTED.LotId AS lotId,
+        INSERTED.LotCode AS lotCode,
+        INSERTED.RaceId AS raceId,
+        INSERTED.TypeProductionId AS typeProductionId,
+        INSERTED.SexeId AS sexeId,
+        INSERTED.StartDate AS startDate,
+        INSERTED.InitialCount AS initialCount,
+        INSERTED.MaleCount AS maleCount,
+        INSERTED.FemaleCount AS femaleCount,
+        INSERTED.Status AS status,
+        INSERTED.Notes AS notes,
+        INSERTED.CreatedAt AS createdAt,
+        INSERTED.UpdatedAt AS updatedAt
+      VALUES (@code, @raceId, @typeProductionId, @sexeId, @startDate, @initialCount, @maleCount, @femaleCount, 'ACTIF', @notes, GETDATE(), GETDATE())`);
+  
+  return result.recordset[0];
+}
+
+export async function update(lotId: number, data: UpdateLotDTO): Promise<Lot> {
+  const pool = await getPool();
+  
+  const updates: string[] = [];
+  const request = pool.request().input('id', sql.Int, lotId);
+  
+  if (data.raceId !== undefined) {
+    updates.push('RaceId = @raceId');
+    request.input('raceId', sql.Int, data.raceId);
+  }
+  if (data.typeProductionId !== undefined) {
+    updates.push('TypeProductionId = @typeProductionId');
+    request.input('typeProductionId', sql.Int, data.typeProductionId);
+  }
+  if (data.sexeId !== undefined) {
+    updates.push('SexeId = @sexeId');
+    request.input('sexeId', sql.Int, data.sexeId);
+  }
+  if (data.initialCount !== undefined) {
+    updates.push('InitialCount = @initialCount');
+    request.input('initialCount', sql.Int, data.initialCount);
+  }
+  if (data.maleCount !== undefined) {
+    updates.push('MaleCount = @maleCount');
+    request.input('maleCount', sql.Int, data.maleCount);
+  }
+  if (data.femaleCount !== undefined) {
+    updates.push('FemaleCount = @femaleCount');
+    request.input('femaleCount', sql.Int, data.femaleCount);
+  }
+  if (data.status !== undefined) {
+    updates.push('Status = @status');
+    request.input('status', sql.NVarChar(20), data.status);
+  }
+  if (data.notes !== undefined) {
+    updates.push('Notes = @notes');
+    request.input('notes', sql.NVarChar(sql.MAX), data.notes);
+  }
+  
+  updates.push('UpdatedAt = GETDATE()');
+  
+  const result = await request.query(`UPDATE elevage.Lot
+    SET ${updates.join(', ')}
+    OUTPUT
+      INSERTED.LotId AS lotId,
+      INSERTED.LotCode AS lotCode,
+      INSERTED.RaceId AS raceId,
+      INSERTED.TypeProductionId AS typeProductionId,
+      INSERTED.SexeId AS sexeId,
+      INSERTED.StartDate AS startDate,
+      INSERTED.InitialCount AS initialCount,
+      INSERTED.MaleCount AS maleCount,
+      INSERTED.FemaleCount AS femaleCount,
+      INSERTED.Status AS status,
+      INSERTED.Notes AS notes,
+      INSERTED.CreatedAt AS createdAt,
+      INSERTED.UpdatedAt AS updatedAt
+    WHERE LotId = @id`);
+  
+  return result.recordset[0];
+}
+
+export async function delete$(lotId: number): Promise<void> {
+  const pool = await getPool();
+  await pool.request()
+    .input('id', sql.Int, lotId)
+    .query(`DELETE FROM elevage.Lot WHERE LotId = @id`);
+}
