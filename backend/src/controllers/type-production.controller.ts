@@ -1,32 +1,36 @@
 import { Request, Response } from 'express';
-import * as typeProductionRepository from '../repositories/type-production.repository';
+import * as typeProductionService from '../services/type-production.service';
 
-export async function getTypeProductionById(req: Request, res: Response): Promise<void> {
-  try {
-    const sexeId = parseInt(req.params.id as string || '', 10);
-    if (isNaN(sexeId)) {
-      res.status(400).json({ message: 'ID de sexe invalide' });
-      return;
-    }
-
-    const sexe = await typeProductionRepository.findById(sexeId);
-    if (!sexe) {
-      res.status(404).json({ message: 'Sexe non trouvé' });
-      return;
-    }
-    res.json(sexe);
-  } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
-  }
-}
-
+/**
+ * Controller TypeProduction - Gestion HTTP des types de production
+ * Appelle la couche service (qui appelle les repositories)
+ */
 
 export async function getAllTypeProductions(req: Request, res: Response): Promise<void> {
   try {
-    const types = await typeProductionRepository.findAll();
-    res.json(types);
+    const types = await typeProductionService.getAllTypeProductions();
+    res.json({ success: true, data: types });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: (error as Error).message });
+  }
+}
+
+export async function getTypeProductionById(req: Request, res: Response): Promise<void> {
+  try {
+    const typeId = parseInt(req.params.id as string || '', 10);
+    if (isNaN(typeId)) {
+      res.status(400).json({ success: false, message: 'ID de type invalide' });
+      return;
+    }
+
+    const type = await typeProductionService.getTypeProductionById(typeId);
+    if (!type) {
+      res.status(404).json({ success: false, message: 'Type de production non trouvé' });
+      return;
+    }
+    res.json({ success: true, data: type });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: (error as Error).message });
   }
 }
 
@@ -35,13 +39,14 @@ export async function createTypeProduction(req: Request, res: Response): Promise
     const { code, label, sexeId } = req.body;
     
     if (!code || !label) {
-      res.status(400).json({ message: 'Code et label sont requis' });
+      res.status(400).json({ success: false, message: 'Code et label sont requis' });
       return;
     }
 
-    const newType = await typeProductionRepository.create({ code, label, sexeId: sexeId ?? null });
-    res.status(201).json(newType);
+    const newType = await typeProductionService.createTypeProduction({ code, label, sexeId: sexeId ?? null });
+    res.status(201).json({ success: true, data: newType, message: 'Type de production créé avec succès' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
+    const message = (error as Error).message;
+    res.status(400).json({ success: false, message });
   }
 }

@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
-import * as phaseAlimentationRepository from '../repositories/phase-alimentation.repository';
+import * as phaseService from '../services/phase-alimentation.service';
+
+/**
+ * Controller PhaseAlimentation - Gestion HTTP des phases d'alimentation
+ * Appelle la couche service (qui appelle les repositories)
+ */
 
 export async function getAllPhaseAlimentations(req: Request, res: Response): Promise<void> {
   try {
-    const phases = await phaseAlimentationRepository.findAll();
-    res.json(phases);
+    const phases = await phaseService.getAllPhases();
+    res.json({ success: true, data: phases });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: (error as Error).message });
   }
 }
 
@@ -14,18 +19,18 @@ export async function getPhaseAlimentationById(req: Request, res: Response): Pro
   try {
     const phaseId = parseInt(req.params.id as string || '', 10);
     if (isNaN(phaseId)) {
-      res.status(400).json({ message: 'ID de phase invalide' });
+      res.status(400).json({ success: false, message: 'ID de phase invalide' });
       return;
     }
 
-    const phase = await phaseAlimentationRepository.findById(phaseId);
+    const phase = await phaseService.getPhaseById(phaseId);
     if (!phase) {
-      res.status(404).json({ message: 'Phase d\'alimentation non trouvée' });
+      res.status(404).json({ success: false, message: 'Phase d\'alimentation non trouvée' });
       return;
     }
-    res.json(phase);
+    res.json({ success: true, data: phase });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
+    res.status(500).json({ success: false, message: 'Erreur serveur', error: (error as Error).message });
   }
 }
 
@@ -34,21 +39,11 @@ export async function createPhaseAlimentation(req: Request, res: Response): Prom
     const { code, label, weekFrom, weekTo, rationMinGPerDay, rationMaxGPerDay, objective, raceId, typeProductionId } = req.body;
     
     if (!code || !label || weekFrom === undefined || weekTo === undefined || rationMinGPerDay === undefined || rationMaxGPerDay === undefined) {
-      res.status(400).json({ message: 'Code, label, weekFrom, weekTo, rationMinGPerDay, rationMaxGPerDay sont requis' });
+      res.status(400).json({ success: false, message: 'Code, label, weekFrom, weekTo, rationMinGPerDay, rationMaxGPerDay sont requis' });
       return;
     }
 
-    if (weekFrom > weekTo) {
-      res.status(400).json({ message: 'weekFrom ne peut pas être supérieur à weekTo' });
-      return;
-    }
-
-    if (rationMinGPerDay > rationMaxGPerDay) {
-      res.status(400).json({ message: 'rationMinGPerDay ne peut pas être supérieur à rationMaxGPerDay' });
-      return;
-    }
-
-    const newPhase = await phaseAlimentationRepository.create({
+    const newPhase = await phaseService.createPhase({
       code,
       label,
       weekFrom,
@@ -59,8 +54,9 @@ export async function createPhaseAlimentation(req: Request, res: Response): Prom
       raceId: raceId ?? null,
       typeProductionId: typeProductionId ?? null
     });
-    res.status(201).json(newPhase);
+    res.status(201).json({ success: true, data: newPhase, message: 'Phase d\'alimentation créée avec succès' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
+    const message = (error as Error).message;
+    res.status(400).json({ success: false, message });
   }
 }
