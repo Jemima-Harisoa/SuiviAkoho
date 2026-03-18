@@ -15,6 +15,10 @@ import suiviPouletRoutes from './suivi-poulet.routes';
 import suiviOeufRoutes from './suivi-oeuf.routes';
 import traitementOeufsRoutes from './traitement-oeufs.routes';
 import incubationRoutes from './incubation.routes';
+import productionRoutes from './production.routes';
+import venteRoutes from './vente.routes';
+import achatRoutes from './achat.routes';
+import previsionRoutes from './prevision.routes';
 
 // Routes d'historique
 import historiqueSuiviPouletRoutes from './historique-suivi-poulet.routes';
@@ -38,6 +42,10 @@ router.use('/api/suivi-poulet', suiviPouletRoutes);
 router.use('/api/suivi-oeuf', suiviOeufRoutes);
 router.use('/api/traitement-oeufs', traitementOeufsRoutes);
 router.use('/api/incubations', incubationRoutes);
+router.use('/api/production', productionRoutes);
+router.use('/api/ventes', venteRoutes);
+router.use('/api/achats', achatRoutes);
+router.use('/api/previsions', previsionRoutes);
 
 // HISTORIQUE - Endpoints de suivi temporel
 router.use('/api/historique-suivi-poulet', historiqueSuiviPouletRoutes);

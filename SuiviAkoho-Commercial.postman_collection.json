@@ -1,0 +1,422 @@
+{
+  "info": {
+    "name": "SuiviAkoho - Commercial API",
+    "description": "Collection Postman pour tester la structure commerciale: production, ventes, achats, previsions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "inherit"
+  },
+  "item": [
+    {
+      "name": "1. PRODUCTION",
+      "item": [
+        {
+          "name": "POST - Creer Production OEUF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"productType\": \"OEUF\",\n  \"availableQuantity\": 300,\n  \"unit\": \"PIECE\",\n  \"unitPriceAr\": 600,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/production",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "production"]
+            }
+          }
+        },
+        {
+          "name": "POST - Creer Production POULET",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"productType\": \"POULET\",\n  \"availableQuantity\": 50,\n  \"unit\": \"PIECE\",\n  \"unitPriceAr\": 18000,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/production",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "production"]
+            }
+          }
+        },
+        {
+          "name": "GET - Stock Disponible",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/production/stock",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "production", "stock"]
+            }
+          }
+        },
+        {
+          "name": "GET - Valeur Totale Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/production/valeur",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "production", "valeur"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Maj Quantite Production",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"availableQuantity\": 250,\n  \"unitPriceAr\": 650\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/production/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "production", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. VENTES",
+      "item": [
+        {
+          "name": "POST - Creer Vente OEUF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productionId\": 1,\n  \"quantity\": 50,\n  \"unitPriceAr\": 650,\n  \"customerName\": \"Client Local A\",\n  \"notes\": \"Vente oeufs marche hebdo\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/ventes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ventes"]
+            }
+          }
+        },
+        {
+          "name": "POST - Creer Vente POULET",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productionId\": 2,\n  \"quantity\": 5,\n  \"unitPriceAr\": 18000,\n  \"customerName\": \"Boucherie Centre\",\n  \"notes\": \"Vente poulets vivants\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/ventes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ventes"]
+            }
+          }
+        },
+        {
+          "name": "GET - Toutes les Ventes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/ventes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ventes"]
+            }
+          }
+        },
+        {
+          "name": "GET - Chiffre Affaires Total",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/ventes/ca",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ventes", "ca"]
+            }
+          }
+        },
+        {
+          "name": "GET - Chiffre Affaires par Periode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/ventes/ca?startDate=2026-03-01&endDate=2026-03-31",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ventes", "ca"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-03-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-03-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. ACHATS",
+      "item": [
+        {
+          "name": "POST - Creer Achat Aliment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"category\": \"ALIMENT\",\n  \"itemName\": \"Mais concasse\",\n  \"quantity\": 100,\n  \"unit\": \"KG\",\n  \"unitPriceAr\": 2500,\n  \"supplierName\": \"Fournisseur Local\",\n  \"notes\": \"Achat aliment hebdomadaire\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/achats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "achats"]
+            }
+          }
+        },
+        {
+          "name": "POST - Creer Achat Medicament",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"category\": \"MEDICAMENT\",\n  \"itemName\": \"Antibiotique\",\n  \"quantity\": 2,\n  \"unit\": \"PIECE\",\n  \"unitPriceAr\": 25000,\n  \"supplierName\": \"Pharma Vet\",\n  \"notes\": \"Traitement preventif\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/achats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "achats"]
+            }
+          }
+        },
+        {
+          "name": "GET - Tous les Achats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/achats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "achats"]
+            }
+          }
+        },
+        {
+          "name": "GET - Total Depenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/achats/depenses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "achats", "depenses"]
+            }
+          }
+        },
+        {
+          "name": "GET - Total Depenses par Periode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/achats/depenses?startDate=2026-03-01&endDate=2026-03-31",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "achats", "depenses"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-03-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-03-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. PREVISIONS",
+      "item": [
+        {
+          "name": "POST - Creer Prevision Aliment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"category\": \"ALIMENT\",\n  \"description\": \"Prevision achat aliment semaine prochaine\",\n  \"plannedDate\": \"2026-03-25\",\n  \"plannedAmountAr\": 300000,\n  \"notes\": \"Stock a reconstituer\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/previsions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "previsions"]
+            }
+          }
+        },
+        {
+          "name": "POST - Creer Prevision Soin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"category\": \"MEDICAMENT\",\n  \"description\": \"Prevision vaccin mensuel\",\n  \"plannedDate\": \"2026-03-28\",\n  \"plannedAmountAr\": 120000\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/previsions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "previsions"]
+            }
+          }
+        },
+        {
+          "name": "GET - Toutes les Previsions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/previsions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "previsions"]
+            }
+          }
+        },
+        {
+          "name": "GET - Resume Budget",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/previsions/budget",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "previsions", "budget"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Marquer Prevision Realisee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"realizedDate\": \"2026-03-25\",\n  \"realizedAmountAr\": 320000,\n  \"notes\": \"Prix reel plus eleve que prevu\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/previsions/1/realiser",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "previsions", "1", "realiser"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
