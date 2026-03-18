@@ -96,7 +96,7 @@ export async function create(data: CreateIncubationDTO): Promise<Incubation> {
     .input('incubatorType', sql.NVarChar(20), data.incubatorType)
     .input('startDate', sql.Date, data.startDate)
     .input('eggsSetCount', sql.Int, data.eggsSetCount)
-    .input('createdLotId', sql.Int, data.createdLotId ?? null)
+    .input('createdLotId', sql.Int, (data as any).createdLotId ?? null)
     .query(`INSERT INTO Incubation
       (SourceLotId, IncubatorType, StartDate, EggsSetCount, CreatedLotId, CreatedAt)
       OUTPUT

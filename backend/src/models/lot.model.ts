@@ -16,10 +16,11 @@ export interface CreateLotDTO {
   lotCode: string;
   raceId: number;
   typeProductionId: number;
-  hatchDate: Date;
+  hatchDate: string | Date; // Accepte string ISO ou objet Date
   initialCount: number;
   maleCount: number;
   femaleCount: number;
+  status?: 'ACTIF' | 'CLOTURE' | 'ANNULE';
   purchaseValue?: number | null;
 }
 

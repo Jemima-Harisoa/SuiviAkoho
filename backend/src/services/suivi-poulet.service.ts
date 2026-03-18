@@ -62,9 +62,8 @@ export async function createSuiviPoulet(data: CreateSuiviPouletDTO): Promise<Sui
 }
 
 export async function updateSuiviPoulet(suiviPouletId: number, data: UpdateSuiviPouletDTO): Promise<SuiviPoulet> {
-  // Récupérer d'abord tous les suivis pour trouver le bon (car pas de findById dans repository)
-  const allSuivis = await suiviPouletRepository.findAll();
-  const currentSuivi = allSuivis.find(s => s.suiviPouletId === suiviPouletId);
+  // Récupérer le suivi par ID
+  const currentSuivi = await suiviPouletRepository.findById(suiviPouletId);
   if (!currentSuivi) throw new Error(`Suivi poulet non trouvé`);
   
   const lot = await lotRepository.findById(currentSuivi.lotId);

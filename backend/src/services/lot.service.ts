@@ -42,32 +42,42 @@ function canLotProduce(lot: Lot): boolean {
 
 /**
  * Parse et valide une date d'éclosion
+ * Accepte: "2026-03-18", "2026-03-18T10:30:00Z", new Date()
  * @param dateInput String (ISO) ou objet Date
  * @returns Date validée et parsée
  */
-function parseDateInput(dateInput: string | Date): Date {
-  let date: Date;
-  
-  if (typeof dateInput === 'string') {
-    date = new Date(dateInput);
-  } else if (dateInput instanceof Date) {
-    date = dateInput;
-  } else {
-    throw new Error('Date d\'éclosion invalide: doit être string (ISO) ou Date');
+function parseDateInput(dateInput: any): Date {
+  if (!dateInput) {
+    throw new Error('Date d\'éclosion requise');
   }
 
+  let date: Date;
+  
+  // Si c'est une string, la parser
+  if (typeof dateInput === 'string') {
+    // Accepte les formats: "2026-03-18" ou "2026-03-18T10:30:00Z"
+    date = new Date(dateInput);
+  } else if (dateInput instanceof Date) {
+    // Si c'est déjà une Date, l'utiliser directement
+    date = dateInput;
+  } else {
+    throw new Error('Date d\'éclosion invalide: doit être string ("YYYY-MM-DD") ou Date');
+  }
+
+  // Vérifier que la date est valide
   if (isNaN(date.getTime())) {
-    throw new Error('Date d\'éclosion invalide: format incorrect');
+    throw new Error('Date d\'éclosion invalide: format incorrect. Utilisez "YYYY-MM-DD"');
   }
 
   // Vérifier que la date n'est pas dans le futur
-  if (date > new Date()) {
+  const now = new Date();
+  if (date > now) {
     throw new Error('Date d\'éclosion ne peut pas être dans le futur');
   }
 
   // Vérifier que la date n'est pas trop ancienne (max 5 ans)
   const maxAgeMs = 5 * 365 * 24 * 60 * 60 * 1000;
-  const ageMs = new Date().getTime() - date.getTime();
+  const ageMs = now.getTime() - date.getTime();
   if (ageMs > maxAgeMs) {
     throw new Error('Date d\'éclosion: lot trop ancien (> 5 ans)');
   }
@@ -129,8 +139,7 @@ export async function createLot(data: CreateLotDTO): Promise<Lot> {
   }
   
   // Valider et parser la date d'éclosion
-  // (accepte string ISO "2026-03-18" ou objet Date)
-  const parsedDate = parseDateInput(data.hatchDate as any);
+  const parsedDate = parseDateInput(data.hatchDate);
   
   // Créer le lot avec la date parsée
   const createData: CreateLotDTO = {

@@ -10,6 +10,17 @@ export async function getAllSuiviOeuf(req: Request, res: Response): Promise<void
   }
 }
 
+export async function getSuiviOeufById(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+    const suivi = await suiviOeufService.getSuiviOeufById(parseInt(id as string));
+    res.status(200).json({ success: true, data: suivi });
+  } catch (error: any) {
+    const statusCode = error.message.includes('non trouvé') ? 404 : 400;
+    res.status(statusCode).json({ success: false, message: error.message });
+  }
+}
+
 export async function getSuiviOeufByLot(req: Request, res: Response): Promise<void> {
   try {
     const { lotId } = req.params;

@@ -60,6 +60,25 @@ export async function findByLotAndWeek(lotId: number, week: number): Promise<Sui
   return result.recordset[0] ?? null;
 }
 
+export async function findById(suiviPouletId: number): Promise<SuiviPoulet | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, suiviPouletId)
+    .query(`SELECT 
+      SuiviPouletId AS suiviPouletId,
+      LotId AS lotId,
+      WeekNumber AS week,
+      RemainingCount AS remainingCount,
+      AvgWeightG AS avgWeightG,
+      FeedTotalKg AS feedTotalKg,
+      FeedCostAr AS feedCostAr,
+      CreatedAt AS createdAt
+      FROM SuiviPoulet
+      WHERE SuiviPouletId = @id`);
+  
+  return result.recordset[0] ?? null;
+}
+
 export async function create(data: CreateSuiviPouletDTO): Promise<SuiviPoulet> {
   const pool = await getPool();
   const result = await pool.request()

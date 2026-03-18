@@ -1,9 +1,10 @@
 export interface TraitementOeufs {
-  traitementId: number;
+  traitementOeufsId: number;
   suiviOeufId: number;
-  treatmentType: 'VENTE' | 'INCUBATION';
-  count: number;
-  unitPrice: number | null;
+  sourceLotId: number;
+  processType: 'VENTE' | 'INCUBATION';
+  eggCount: number;
+  unitPriceAr: number | null;
   totalAmountAr: number | null;
   incubationId: number | null;
   createdAt: Date;
@@ -11,8 +12,9 @@ export interface TraitementOeufs {
 
 export interface CreateTraitementOeufsDTO {
   suiviOeufId: number;
-  treatmentType: 'VENTE' | 'INCUBATION';
-  count: number;
-  unitPrice?: number | null;
+  sourceLotId: number;
+  processType: 'VENTE' | 'INCUBATION';
+  eggCount: number;
+  unitPriceAr?: number | null;
   incubationId?: number | null;
 }

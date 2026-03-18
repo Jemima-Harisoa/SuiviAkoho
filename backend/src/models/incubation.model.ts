@@ -16,7 +16,8 @@ export interface CreateIncubationDTO {
   incubatorType: string;
   startDate: Date;
   eggsSetCount: number;
-  createdLotId?: number | null;
+  raceId?: number; // Requis si sourceLotId n'est pas fourni
+  typeProductionId?: number; // Requis si sourceLotId n'est pas fourni
 }
 
 export interface UpdateIncubationDTO {

@@ -123,6 +123,7 @@ export async function create(data: CreateLotDTO): Promise<Lot> {
     .input('initialCount', sql.Int, data.initialCount)
     .input('maleCount', sql.Int, data.maleCount)
     .input('femaleCount', sql.Int, data.femaleCount)
+    .input('status', sql.NVarChar(20), data.status ?? 'ACTIF')
     .input('purchaseValue', sql.Decimal(18, 2), data.purchaseValue ?? null)
     .query(`INSERT INTO Lot 
       (LotCode, RaceId, TypeProductionId, HatchDate, InitialCount, MaleCount, FemaleCount, Status, PurchaseValue, CreatedAt)
@@ -138,7 +139,7 @@ export async function create(data: CreateLotDTO): Promise<Lot> {
         INSERTED.Status AS status,
         INSERTED.PurchaseValue AS purchaseValue,
         INSERTED.CreatedAt AS createdAt
-      VALUES (@code, @raceId, @typeProductionId, @hatchDate, @initialCount, @maleCount, @femaleCount, 'ACTIF', @purchaseValue, GETDATE())`)
+      VALUES (@code, @raceId, @typeProductionId, @hatchDate, @initialCount, @maleCount, @femaleCount, @status, @purchaseValue, GETDATE())`)
   
   return result.recordset[0];
 }

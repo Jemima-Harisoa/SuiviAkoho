@@ -93,7 +93,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lotCode\": \"LOT001\",\n  \"raceId\": 1,\n  \"typeProductionId\": 1,\n  \"sexeId\": 1,\n  \"startDate\": \"2026-03-18\",\n  \"initialCount\": 100,\n  \"maleCount\": 30,\n  \"femaleCount\": 70,\n  \"status\": \"ACTIF\",\n  \"notes\": \"Premier lot de l'année\"\n}"
+              "raw": "{\n  \"lotCode\": \"LOT-001\",\n  \"raceId\": 1,\n  \"typeProductionId\": 1,\n  \"hatchDate\": \"2026-03-15\",\n  \"initialCount\": 100,\n  \"maleCount\": 30,\n  \"femaleCount\": 70,\n  \"purchaseValue\": 5000\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/lots/create",
@@ -116,7 +116,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"maleCount\": 25,\n  \"femaleCount\": 75,\n  \"notes\": \"Mise à jour du lot\"\n}"
+              "raw": "{\n  \"initialCount\": 95,\n  \"maleCount\": 28,\n  \"femaleCount\": 67,\n  \"purchaseValue\": 5200,\n  \"status\": \"ACTIF\"\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/lots/1",
@@ -128,10 +128,19 @@
           }
         },
         {
-          "name": "POST - Clôturer Lot",
+          "name": "PUT - Clôturer Lot",
           "request": {
-            "method": "POST",
-            "header": [],
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CLOTURE\"\n}"
+            },
             "url": {
               "raw": "http://localhost:3000/api/lots/1/close",
               "protocol": "http",
@@ -203,7 +212,7 @@
           }
         },
         {
-          "name": "POST - Créer Suivi Poulet",
+          "name": "POST - Créer Suivi Poulet (Semaine 1)",
           "request": {
             "method": "POST",
             "header": [
@@ -214,7 +223,30 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lotId\": 1,\n  \"week\": 1,\n  \"averageWeightG\": 250,\n  \"rationGPerDay\": 25,\n  \"suppliedRationG\": 500,\n  \"costPerAr\": 150,\n  \"mortality\": 2,\n  \"soldCount\": 0,\n  \"notes\": \"Première semaine ok\"\n}"
+              "raw": "{\n  \"lotId\": 1,\n  \"weekNumber\": 1,\n  \"remainingCount\": 98,\n  \"avgWeightG\": 150.5,\n  \"feedTotalKg\": 15.2,\n  \"feedCostAr\": 3800\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Suivi Poulet (Semaine 4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"weekNumber\": 4,\n  \"remainingCount\": 95,\n  \"avgWeightG\": 685.3,\n  \"feedTotalKg\": 68.5,\n  \"feedCostAr\": 17100\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/suivi-poulet/create",
@@ -237,7 +269,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"averageWeightG\": 260,\n  \"mortality\": 3,\n  \"notes\": \"Mise à jour\"\n}"
+              "raw": "{\n  \"remainingCount\": 94,\n  \"avgWeightG\": 705.2,\n  \"feedTotalKg\": 71.2,\n  \"feedCostAr\": 17800\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/suivi-poulet/1",
@@ -310,7 +342,7 @@
           }
         },
         {
-          "name": "POST - Créer Suivi Œuf",
+          "name": "POST - Créer Suivi Œuf (Semaine 20)",
           "request": {
             "method": "POST",
             "header": [
@@ -321,7 +353,30 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lotId\": 1,\n  \"week\": 1,\n  \"eggsPerDay\": 45,\n  \"eggsPerWeek\": 315,\n  \"layingRatePct\": 64.3,\n  \"notes\": \"Taux de ponte bon\"\n}"
+              "raw": "{\n  \"lotId\": 2,\n  \"weekNumber\": 20,\n  \"eggsPerDay\": 45,\n  \"eggsPerWeek\": 315,\n  \"layingRatePct\": 78.5,\n  \"weeklyRevenueAr\": 157500\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Suivi Œuf (Semaine 35)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 2,\n  \"weekNumber\": 35,\n  \"eggsPerDay\": 62,\n  \"eggsPerWeek\": 434,\n  \"layingRatePct\": 92.3,\n  \"weeklyRevenueAr\": 217000\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/suivi-oeuf/create",
@@ -344,7 +399,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"eggsPerDay\": 48,\n  \"eggsPerWeek\": 336,\n  \"layingRatePct\": 68.6\n}"
+              "raw": "{\n  \"eggsPerDay\": 63,\n  \"eggsPerWeek\": 441,\n  \"layingRatePct\": 93.8,\n  \"weeklyRevenueAr\": 220500\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/suivi-oeuf/1",
@@ -428,7 +483,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"suiviOeufId\": 1,\n  \"treatmentType\": \"VENTE\",\n  \"count\": 200,\n  \"unitPrice\": 500,\n  \"totalAmountAr\": 100000\n}"
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"processType\": \"VENTE\",\n  \"eggCount\": 200,\n  \"unitPriceAr\": 500\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/traitement-oeufs/create",
@@ -451,7 +506,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"suiviOeufId\": 1,\n  \"treatmentType\": \"INCUBATION\",\n  \"count\": 115\n}"
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"processType\": \"INCUBATION\",\n  \"eggCount\": 150,\n  \"unitPriceAr\": 800,\n  \"incubationId\": 1\n}"
             },
             "url": {
               "raw": "http://localhost:3000/api/traitement-oeufs/create",
@@ -482,16 +537,16 @@
       "name": "5. INCUBATION",
       "item": [
         {
-          "name": "GET - Tous les incubations",
+          "name": "GET - Tous les incubateurs",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/incubations",
+              "raw": "http://localhost:3000/api/incubation",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "incubations"]
+              "path": ["api", "incubation"]
             }
           }
         },
@@ -501,49 +556,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/incubations/1",
+              "raw": "http://localhost:3000/api/incubation/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "incubations", "1"]
-            }
-          }
-        },
-        {
-          "name": "GET - Incubation par Lot",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:3000/api/incubations/lot/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "3000",
-              "path": ["api", "incubations", "lot", "1"]
-            }
-          }
-        },
-        {
-          "name": "GET - Incubations par Plage de Dates",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:3000/api/incubations/range?startDate=2026-01-01&endDate=2026-12-31",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "3000",
-              "path": ["api", "incubations", "range"],
-              "query": [
-                {
-                  "key": "startDate",
-                  "value": "2026-01-01"
-                },
-                {
-                  "key": "endDate",
-                  "value": "2026-12-31"
-                }
-              ]
+              "path": ["api", "incubation", "1"]
             }
           }
         },
@@ -559,19 +576,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lotId\": 1,\n  \"incubatorType\": \"INCUBATEUR_STATIQUE\",\n  \"startDate\": \"2026-03-18\",\n  \"eggsSetCount\": 115,\n  \"notes\": \"Première fournée d'incubation\"\n}"
+              "raw": "{\n  \"sourceLotId\": 2,\n  \"incubatorType\": \"FORCED\",\n  \"startDate\": \"2026-03-18\",\n  \"eggsSetCount\": 300,\n  \"createdLotId\": null\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/incubations/create",
+              "raw": "http://localhost:3000/api/incubation/create",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "incubations", "create"]
+              "path": ["api", "incubation", "create"]
             }
           }
         },
         {
-          "name": "PUT - Mettre à jour Incubation (enregistrer éclosion)",
+          "name": "PUT - Enregistrer Éclosion",
           "request": {
             "method": "PUT",
             "header": [
@@ -582,14 +599,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"hatchedCount\": 105,\n  \"notes\": \"Éclosion réussie\"\n}"
+              "raw": "{\n  \"eggHatchedCount\": 270,\n  \"createdLotId\": 3\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/incubations/1",
+              "raw": "http://localhost:3000/api/incubation/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "incubations", "1"]
+              "path": ["api", "incubation", "1"]
             }
           }
         },
@@ -599,11 +616,11 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/incubations/1",
+              "raw": "http://localhost:3000/api/incubation/1",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["api", "incubations", "1"]
+              "path": ["api", "incubation", "1"]
             }
           }
         }

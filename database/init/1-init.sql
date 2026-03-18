@@ -203,6 +203,7 @@ GO
 CREATE TABLE TraitementOeufs (
     TraitementOeufsId BIGINT IDENTITY PRIMARY KEY,
     SuiviOeufId BIGINT NOT NULL,
+    SourceLotId INT NOT NULL,
     ProcessType NVARCHAR(20) NOT NULL,
     EggCount INT NOT NULL,
     UnitPriceAr DECIMAL(18,2) NULL,
@@ -216,6 +217,9 @@ CREATE TABLE TraitementOeufs (
 
     CONSTRAINT FK_TraitementOeufs_SuiviOeuf FOREIGN KEY (SuiviOeufId)
         REFERENCES SuiviOeuf(SuiviOeufId),
+
+    CONSTRAINT FK_TraitementOeufs_SourceLot FOREIGN KEY (SourceLotId)
+        REFERENCES Lot(LotId),
 
     CONSTRAINT FK_TraitementOeufs_Incubation FOREIGN KEY (IncubationId)
         REFERENCES Incubation(IncubationId),

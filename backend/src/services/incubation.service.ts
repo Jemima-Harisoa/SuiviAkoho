@@ -39,13 +39,25 @@ export async function getIncubationByDateRange(startDate: Date, endDate: Date): 
 }
 
 export async function createIncubation(data: CreateIncubationDTO): Promise<Incubation> {
+  let raceId = data.raceId;
+  let typeProductionId = data.typeProductionId;
+  
   // Validation du lot source si fourni
   if (data.sourceLotId !== undefined && data.sourceLotId !== null && data.sourceLotId <= 0) {
     throw new Error('SourceLotId doit être positif');
   }
+  
   if (data.sourceLotId) {
+    // Si lot source fourni, copier race et type
     const lot = await lotRepository.findById(data.sourceLotId);
     if (!lot) throw new Error(`Lot source non trouvé`);
+    raceId = lot.raceId;
+    typeProductionId = lot.typeProductionId;
+  } else {
+    // Si pas de lot source, race et type sont requis
+    if (!raceId || !typeProductionId) {
+      throw new Error('Si aucun lot source n\'est spécifié, raceId et typeProductionId sont requis');
+    }
   }
   
   // Validation type incubateur
@@ -53,8 +65,23 @@ export async function createIncubation(data: CreateIncubationDTO): Promise<Incub
     throw new Error('Type d\'incubateur requis');
   }
   
-  // Validation date de démarrage
-  if (!(data.startDate instanceof Date) || isNaN(data.startDate.getTime())) {
+  const incubatorType = data.incubatorType.toUpperCase();
+  const validTypes = ['NATUREL', 'MODERNE'];
+  if (!validTypes.includes(incubatorType)) {
+    throw new Error(`Type d'incubateur invalide. Doit être: ${validTypes.join(' ou ')}`);
+  }
+  
+  // Validation et conversion date de démarrage
+  let startDate: Date;
+  if (typeof data.startDate === 'string') {
+    startDate = new Date(data.startDate);
+  } else if (data.startDate instanceof Date) {
+    startDate = data.startDate;
+  } else {
+    throw new Error('Date de démarrage invalide');
+  }
+  
+  if (isNaN(startDate.getTime())) {
     throw new Error('Date de démarrage invalide');
   }
   
@@ -63,7 +90,39 @@ export async function createIncubation(data: CreateIncubationDTO): Promise<Incub
     throw new Error('Nombre d\'œufs à couver doit être > 0');
   }
   
-  return incubationRepository.create(data);
+  // Créer le lot qui accueillera les poussins éclos
+  const hatchDate = new Date(startDate);
+  hatchDate.setDate(hatchDate.getDate() + 21);
+  const hatchDateString = hatchDate.toISOString().split('T')[0];
+  
+  const timestamp = new Date().getTime();
+  const generatedLotCode = `HATCH-${timestamp}`;
+  
+  console.log(`Création du lot d'éclosion: ${generatedLotCode} pour la date ${hatchDateString}`);
+  
+  const createdLot = await lotRepository.create({
+    lotCode: generatedLotCode,
+    raceId: raceId!,
+    typeProductionId: typeProductionId!,
+    hatchDate: hatchDateString,
+    initialCount: data.eggsSetCount, // Initialiser avec le nombre d'œufs à couver
+    maleCount: 0,
+    femaleCount: 0,
+    status: 'ACTIF',
+    purchaseValue: null
+  });
+  
+  console.log(`Lot d'éclosion créé avec ID: ${createdLot.lotId}`);
+  
+  // Créer l'objet avec la date convertie, le type validé et createdLotId
+  const incubationData = {
+    ...data,
+    startDate,
+    incubatorType,
+    createdLotId: createdLot.lotId
+  };
+  
+  return incubationRepository.create(incubationData);
 }
 
 export async function updateIncubation(incubationId: number, data: UpdateIncubationDTO): Promise<Incubation> {
@@ -78,6 +137,26 @@ export async function updateIncubation(incubationId: number, data: UpdateIncubat
     if (data.hatchedCount > incubation.eggsSetCount) {
       throw new Error(`Nombre d'œufs éclos ne peut pas dépasser ${incubation.eggsSetCount}`);
     }
+    
+    // Mettre à jour l'initialCount du lot créé avec le nombre d'œufs éclos
+    if (data.hatchedCount > 0 && incubation.createdLotId) {
+      console.log(`Mise à jour du lot ${incubation.createdLotId} avec initialCount = ${data.hatchedCount}`);
+      
+      await lotRepository.update(incubation.createdLotId, {
+        initialCount: data.hatchedCount
+      });
+      
+      console.log(`Lot ${incubation.createdLotId} mis à jour avec ${data.hatchedCount} poussins`);
+    }
+  }
+  
+  // Validation CreatedLotId si fourni
+  if (data.createdLotId !== undefined && data.createdLotId !== null) {
+    if (data.createdLotId <= 0) {
+      throw new Error('CreatedLotId doit être positif');
+    }
+    const lot = await lotRepository.findById(data.createdLotId);
+    if (!lot) throw new Error(`Lot créé non trouvé`);
   }
   
   return incubationRepository.update(incubationId, data);

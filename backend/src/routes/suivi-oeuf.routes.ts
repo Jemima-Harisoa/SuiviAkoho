@@ -5,6 +5,7 @@ const router = Router();
 
 // GET
 router.get('/', suiviOeufController.getAllSuiviOeuf);
+router.get('/:id', suiviOeufController.getSuiviOeufById);
 router.get('/lot/:lotId', suiviOeufController.getSuiviOeufByLot);
 router.get('/lot/:lotId/week/:week', suiviOeufController.getSuiviOeufByLotAndWeek);
 

@@ -21,6 +21,17 @@ export async function getTraitementBySuiviOeuf(req: Request, res: Response): Pro
   }
 }
 
+export async function getTraitementByLot(req: Request, res: Response): Promise<void> {
+  try {
+    const { sourceLotId } = req.params;
+    const traitements = await traitementService.getTraitementByLot(parseInt(sourceLotId as string));
+    res.status(200).json({ success: true, data: traitements });
+  } catch (error: any) {
+    const statusCode = error.message.includes('non trouvé') ? 404 : 400;
+    res.status(statusCode).json({ success: false, message: error.message });
+  }
+}
+
 export async function getTraitementByType(req: Request, res: Response): Promise<void> {
   try {
     const { type } = req.params;

@@ -57,9 +57,17 @@ export async function createSuiviOeuf(data: CreateSuiviOeufDTO): Promise<SuiviOe
   return suiviOeufRepository.create(data);
 }
 
+export async function getSuiviOeufById(suiviOeufId: number): Promise<SuiviOeuf> {
+  if (suiviOeufId <= 0) throw new Error('ID doit être positif');
+  
+  const suivi = await suiviOeufRepository.findById(suiviOeufId);
+  if (!suivi) throw new Error(`Suivi œuf non trouvé`);
+  
+  return suivi;
+}
+
 export async function updateSuiviOeuf(suiviOeufId: number, data: UpdateSuiviOeufDTO): Promise<SuiviOeuf> {
-  const allSuivis = await suiviOeufRepository.findAll();
-  const suivi = allSuivis.find(s => s.suiviOeufId === suiviOeufId);
+  const suivi = await suiviOeufRepository.findById(suiviOeufId);
   if (!suivi) throw new Error(`Suivi œuf non trouvé`);
   
   // Validation des données fournies
