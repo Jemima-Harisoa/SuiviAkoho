@@ -37,6 +37,24 @@ export async function findById(referenceCompositionAlimentId: number): Promise<R
   return result.recordset[0] ?? null;
 }
 
+export async function findByIngredient(ingredient: string): Promise<ReferenceCompositionAliment | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('ingredient', sql.NVarChar(120), ingredient)
+    .query(`SELECT 
+      ReferenceCompositionAlimentId AS referenceCompositionAlimentId,
+      Ingredient AS ingredient,
+      PercentMin AS percentMin,
+      PercentMax AS percentMax,
+      Notes AS notes,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId
+      FROM ReferenceCompositionAliment 
+      WHERE Ingredient = @ingredient`);
+  
+  return result.recordset[0] ?? null;
+}
+
 export async function create(data: CreateReferenceCompositionAlimentDTO): Promise<ReferenceCompositionAliment> {
   const pool = await getPool();
   const result = await pool.request()

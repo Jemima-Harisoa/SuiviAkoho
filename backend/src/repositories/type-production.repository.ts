@@ -2,6 +2,14 @@ import { getPool } from '../config/database.config';
 import { TypeProduction, CreateTypeProductionDTO } from '../models/type-production.model';
 import sql from 'mssql';
 
+export async function findAll(): Promise<TypeProduction[]> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .query('SELECT TypeProductionId AS typeProductionId, Code AS code, Label AS label, SexeId AS sexeId FROM TypeProduction ORDER BY Code');
+  
+  return result.recordset;
+}
+
 export async function findById(typeProductionId: number): Promise<TypeProduction | null> {
     const pool = await getPool();
     const result = await pool.request()
@@ -9,12 +17,13 @@ export async function findById(typeProductionId: number): Promise<TypeProduction
     .query('SELECT TypeProductionId AS typeProductionId, Code AS code, Label AS label, SexeId AS sexeId FROM TypeProduction WHERE TypeProductionId = @id');
     return result.recordset[0] ?? null;
 }
-export async function findAll(): Promise<TypeProduction[]> {
+
+export async function findByCode(code: string): Promise<TypeProduction | null> {
   const pool = await getPool();
   const result = await pool.request()
-    .query('SELECT TypeProductionId AS typeProductionId, Code AS code, Label AS label, SexeId AS sexeId FROM TypeProduction ORDER BY Code');
-  
-  return result.recordset;
+    .input('code', sql.NVarChar(20), code)
+    .query('SELECT TypeProductionId AS typeProductionId, Code AS code, Label AS label, SexeId AS sexeId FROM TypeProduction WHERE Code = @code');
+  return result.recordset[0] ?? null;
 }
 
 export async function create(data: CreateTypeProductionDTO): Promise<TypeProduction> {

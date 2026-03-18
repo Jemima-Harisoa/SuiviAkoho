@@ -43,6 +43,27 @@ export async function findById(phaseAlimentationId: number): Promise<PhaseAlimen
   return result.recordset[0] ?? null;
 }
 
+export async function findByCode(code: string): Promise<PhaseAlimentation | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('code', sql.NVarChar(20), code)
+    .query(`SELECT 
+      PhaseAlimentationId AS phaseAlimentationId,
+      Code AS code,
+      Label AS label,
+      WeekFrom AS weekFrom,
+      WeekTo AS weekTo,
+      RationMinGPerDay AS rationMinGPerDay,
+      RationMaxGPerDay AS rationMaxGPerDay,
+      Objective AS objective,
+      RaceId AS raceId,
+      TypeProductionId AS typeProductionId
+      FROM PhaseAlimentation 
+      WHERE Code = @code`);
+  
+  return result.recordset[0] ?? null;
+}
+
 export async function create(data: CreatePhaseAlimentationDTO): Promise<PhaseAlimentation> {
   const pool = await getPool();
   const result = await pool.request()

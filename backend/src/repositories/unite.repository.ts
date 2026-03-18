@@ -29,6 +29,20 @@ export async function findById(uniteId: number): Promise<Unite | null> {
   return result.recordset[0] ?? null;
 }
 
+export async function findByCode(code: string): Promise<Unite | null> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('code', sql.NVarChar(20), code)
+    .query(`SELECT 
+      UniteId AS uniteId,
+      Code AS code,
+      Label AS label
+      FROM Unite 
+      WHERE Code = @code`);
+  
+  return result.recordset[0] ?? null;
+}
+
 export async function create(data: CreateUniteDTO): Promise<Unite> {
   const pool = await getPool();
   const result = await pool.request()
