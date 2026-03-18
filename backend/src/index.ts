@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { getPool } from './config/database.config';
 import raceRoutes from './routes/race.routes';
 import sexeRoutes from './routes/sexe.routes';
+import typeProductionRoutes from './routes/type-production.routes';
 
 
 
@@ -24,7 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/races', raceRoutes);
-app.use('/api/sexes', sexeRoutes); 
+app.use('/api/sexes', sexeRoutes);
+app.use('/api/type-productions', typeProductionRoutes); 
 
 // Route de test
 app.get('/health', async (req, res) => {
