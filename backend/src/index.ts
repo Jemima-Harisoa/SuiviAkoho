@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { getPool } from './config/database.config';
 import raceRoutes from './routes/race.routes';
+import sexeRoutes from './routes/sexe.routes';
 
 
 
@@ -21,8 +22,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes Race
-app.use('/api/races', raceRoutes); 
+// Routes
+app.use('/api/races', raceRoutes);
+app.use('/api/sexes', sexeRoutes); 
 
 // Route de test
 app.get('/health', async (req, res) => {
