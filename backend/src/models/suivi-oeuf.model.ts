@@ -5,8 +5,8 @@ export interface SuiviOeuf {
   eggsPerDay: number;
   eggsPerWeek: number;
   layingRatePct: number;
-  notes: string | null;
-  recordedAt: Date;
+  weeklyRevenueAr: number | null;
+  createdAt: Date;
 }
 
 export interface CreateSuiviOeufDTO {
@@ -15,12 +15,12 @@ export interface CreateSuiviOeufDTO {
   eggsPerDay: number;
   eggsPerWeek: number;
   layingRatePct: number;
-  notes?: string;
+  weeklyRevenueAr?: number | null;
 }
 
 export interface UpdateSuiviOeufDTO {
   eggsPerDay?: number;
   eggsPerWeek?: number;
   layingRatePct?: number;
-  notes?: string;
+  weeklyRevenueAr?: number | null;
 }

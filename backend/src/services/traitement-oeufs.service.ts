@@ -49,16 +49,8 @@ export async function createTraitement(data: CreateTraitementOeufsDTO): Promise<
   
   // Validation pour VENTE
   if (data.treatmentType === 'VENTE') {
-    if (data.unitPrice === undefined || data.unitPrice <= 0) {
+    if (data.unitPrice === undefined || data.unitPrice === null || data.unitPrice <= 0) {
       throw new Error('Prix unitaire requis et doit être > 0 pour une vente');
-    }
-    if (data.totalAmountAr === undefined || data.totalAmountAr <= 0) {
-      throw new Error('Montant total requis et doit être > 0 pour une vente');
-    }
-    // Vérifier cohérence: montantTotal = quantité * prixUnitaire
-    const expectedAmount = data.count * data.unitPrice;
-    if (Math.abs(data.totalAmountAr - expectedAmount) > 0.01) {
-      throw new Error(`Montant total incohérent. Attendu: ${expectedAmount} Ar`);
     }
   }
   

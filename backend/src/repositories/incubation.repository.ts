@@ -7,16 +7,15 @@ export async function findAll(): Promise<Incubation[]> {
   const result = await pool.request()
     .query(`SELECT 
       IncubationId AS incubationId,
-      LotId AS lotId,
+      SourceLotId AS sourceLotId,
       IncubatorType AS incubatorType,
       StartDate AS startDate,
       EggsSetCount AS eggsSetCount,
       ExpectedHatchDate AS expectedHatchDate,
-      HatchedCount AS hatchedCount,
+      EggsHatchedCount AS hatchedCount,
       HatchRatePct AS hatchRatePct,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      CreatedLotId AS createdLotId,
+      CreatedAt AS createdAt
       FROM Incubation
       ORDER BY CreatedAt DESC`);
   
@@ -29,16 +28,15 @@ export async function findById(incubationId: number): Promise<Incubation | null>
     .input('id', sql.Int, incubationId)
     .query(`SELECT 
       IncubationId AS incubationId,
-      LotId AS lotId,
+      SourceLotId AS sourceLotId,
       IncubatorType AS incubatorType,
       StartDate AS startDate,
       EggsSetCount AS eggsSetCount,
       ExpectedHatchDate AS expectedHatchDate,
-      HatchedCount AS hatchedCount,
+      EggsHatchedCount AS hatchedCount,
       HatchRatePct AS hatchRatePct,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      CreatedLotId AS createdLotId,
+      CreatedAt AS createdAt
       FROM Incubation
       WHERE IncubationId = @id`);
   
@@ -51,18 +49,17 @@ export async function findByLot(lotId: number): Promise<Incubation[]> {
     .input('lotId', sql.Int, lotId)
     .query(`SELECT 
       IncubationId AS incubationId,
-      LotId AS lotId,
+      SourceLotId AS sourceLotId,
       IncubatorType AS incubatorType,
       StartDate AS startDate,
       EggsSetCount AS eggsSetCount,
       ExpectedHatchDate AS expectedHatchDate,
-      HatchedCount AS hatchedCount,
+      EggsHatchedCount AS hatchedCount,
       HatchRatePct AS hatchRatePct,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      CreatedLotId AS createdLotId,
+      CreatedAt AS createdAt
       FROM Incubation
-      WHERE LotId = @lotId
+      WHERE SourceLotId = @lotId
       ORDER BY CreatedAt DESC`);
   
   return result.recordset;
@@ -75,16 +72,15 @@ export async function findByDateRange(startDate: Date, endDate: Date): Promise<I
     .input('end', sql.Date, endDate)
     .query(`SELECT 
       IncubationId AS incubationId,
-      LotId AS lotId,
+      SourceLotId AS sourceLotId,
       IncubatorType AS incubatorType,
       StartDate AS startDate,
       EggsSetCount AS eggsSetCount,
       ExpectedHatchDate AS expectedHatchDate,
-      HatchedCount AS hatchedCount,
+      EggsHatchedCount AS hatchedCount,
       HatchRatePct AS hatchRatePct,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      CreatedLotId AS createdLotId,
+      CreatedAt AS createdAt
       FROM Incubation
       WHERE StartDate BETWEEN @start AND @end
       ORDER BY CreatedAt DESC`);
@@ -95,32 +91,26 @@ export async function findByDateRange(startDate: Date, endDate: Date): Promise<I
 export async function create(data: CreateIncubationDTO): Promise<Incubation> {
   const pool = await getPool();
   
-  // Calculer la date d'éclosion attendue (21j après le démarrage)
-  const expectedHatchDate = new Date(data.startDate);
-  expectedHatchDate.setDate(expectedHatchDate.getDate() + 21);
-  
   const result = await pool.request()
-    .input('lotId', sql.Int, data.lotId ?? null)
-    .input('incubatorType', sql.NVarChar(100), data.incubatorType)
+    .input('sourceLotId', sql.Int, data.sourceLotId ?? null)
+    .input('incubatorType', sql.NVarChar(20), data.incubatorType)
     .input('startDate', sql.Date, data.startDate)
     .input('eggsSetCount', sql.Int, data.eggsSetCount)
-    .input('expectedHatchDate', sql.Date, expectedHatchDate)
-    .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
+    .input('createdLotId', sql.Int, data.createdLotId ?? null)
     .query(`INSERT INTO Incubation
-      (LotId, IncubatorType, StartDate, EggsSetCount, ExpectedHatchDate, Notes, CreatedAt, UpdatedAt)
+      (SourceLotId, IncubatorType, StartDate, EggsSetCount, CreatedLotId, CreatedAt)
       OUTPUT
         INSERTED.IncubationId AS incubationId,
-        INSERTED.LotId AS lotId,
+        INSERTED.SourceLotId AS sourceLotId,
         INSERTED.IncubatorType AS incubatorType,
         INSERTED.StartDate AS startDate,
         INSERTED.EggsSetCount AS eggsSetCount,
         INSERTED.ExpectedHatchDate AS expectedHatchDate,
-        INSERTED.HatchedCount AS hatchedCount,
+        INSERTED.EggsHatchedCount AS hatchedCount,
         INSERTED.HatchRatePct AS hatchRatePct,
-        INSERTED.Notes AS notes,
-        INSERTED.CreatedAt AS createdAt,
-        INSERTED.UpdatedAt AS updatedAt
-      VALUES (@lotId, @incubatorType, @startDate, @eggsSetCount, @expectedHatchDate, @notes, GETDATE(), GETDATE())`);
+        INSERTED.CreatedLotId AS createdLotId,
+        INSERTED.CreatedAt AS createdAt
+      VALUES (@sourceLotId, @incubatorType, @startDate, @eggsSetCount, @createdLotId, GETDATE())`)
   
   return result.recordset[0];
 }
@@ -132,30 +122,27 @@ export async function update(incubationId: number, data: UpdateIncubationDTO): P
   const request = pool.request().input('id', sql.Int, incubationId);
   
   if (data.hatchedCount !== undefined) {
-    updates.push('HatchedCount = @hatchedCount');
+    updates.push('EggsHatchedCount = @hatchedCount');
     request.input('hatchedCount', sql.Int, data.hatchedCount);
   }
-  if (data.notes !== undefined) {
-    updates.push('Notes = @notes');
-    request.input('notes', sql.NVarChar(sql.MAX), data.notes);
+  if (data.createdLotId !== undefined) {
+    updates.push('CreatedLotId = @createdLotId');
+    request.input('createdLotId', sql.Int, data.createdLotId);
   }
-  
-  updates.push('UpdatedAt = GETDATE()');
   
   const result = await request.query(`UPDATE Incubation
     SET ${updates.join(', ')}
     OUTPUT
       INSERTED.IncubationId AS incubationId,
-      INSERTED.LotId AS lotId,
+      INSERTED.SourceLotId AS sourceLotId,
       INSERTED.IncubatorType AS incubatorType,
       INSERTED.StartDate AS startDate,
       INSERTED.EggsSetCount AS eggsSetCount,
       INSERTED.ExpectedHatchDate AS expectedHatchDate,
-      INSERTED.HatchedCount AS hatchedCount,
+      INSERTED.EggsHatchedCount AS hatchedCount,
       INSERTED.HatchRatePct AS hatchRatePct,
-      INSERTED.Notes AS notes,
-      INSERTED.CreatedAt AS createdAt,
-      INSERTED.UpdatedAt AS updatedAt
+      INSERTED.CreatedLotId AS createdLotId,
+      INSERTED.CreatedAt AS createdAt
     WHERE IncubationId = @id`);
   
   return result.recordset[0];

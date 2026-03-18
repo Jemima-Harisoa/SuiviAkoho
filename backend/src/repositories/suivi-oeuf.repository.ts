@@ -8,14 +8,14 @@ export async function findAll(): Promise<SuiviOeuf[]> {
     .query(`SELECT 
       SuiviOeufId AS suiviOeufId,
       LotId AS lotId,
-      Week AS week,
+      WeekNumber AS week,
       EggsPerDay AS eggsPerDay,
       EggsPerWeek AS eggsPerWeek,
       LayingRatePct AS layingRatePct,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeeklyRevenueAr AS weeklyRevenueAr,
+      CreatedAt AS createdAt
       FROM SuiviOeuf
-      ORDER BY RecordedAt DESC`);
+      ORDER BY CreatedAt DESC`);
   
   return result.recordset;
 }
@@ -27,15 +27,15 @@ export async function findByLot(lotId: number): Promise<SuiviOeuf[]> {
     .query(`SELECT 
       SuiviOeufId AS suiviOeufId,
       LotId AS lotId,
-      Week AS week,
+      WeekNumber AS week,
       EggsPerDay AS eggsPerDay,
       EggsPerWeek AS eggsPerWeek,
       LayingRatePct AS layingRatePct,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeeklyRevenueAr AS weeklyRevenueAr,
+      CreatedAt AS createdAt
       FROM SuiviOeuf
       WHERE LotId = @lotId
-      ORDER BY Week ASC`);
+      ORDER BY WeekNumber ASC`);
   
   return result.recordset;
 }
@@ -48,14 +48,14 @@ export async function findByLotAndWeek(lotId: number, week: number): Promise<Sui
     .query(`SELECT 
       SuiviOeufId AS suiviOeufId,
       LotId AS lotId,
-      Week AS week,
+      WeekNumber AS week,
       EggsPerDay AS eggsPerDay,
       EggsPerWeek AS eggsPerWeek,
       LayingRatePct AS layingRatePct,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeeklyRevenueAr AS weeklyRevenueAr,
+      CreatedAt AS createdAt
       FROM SuiviOeuf
-      WHERE LotId = @lotId AND Week = @week`);
+      WHERE LotId = @lotId AND WeekNumber = @week`);
   
   return result.recordset[0] ?? null;
 }
@@ -64,23 +64,23 @@ export async function create(data: CreateSuiviOeufDTO): Promise<SuiviOeuf> {
   const pool = await getPool();
   const result = await pool.request()
     .input('lotId', sql.Int, data.lotId)
-    .input('week', sql.Int, data.week)
+    .input('weekNumber', sql.Int, data.week)
     .input('eggsPerDay', sql.Decimal(10, 2), data.eggsPerDay)
-    .input('eggsPerWeek', sql.Decimal(10, 2), data.eggsPerWeek)
+    .input('eggsPerWeek', sql.Int, data.eggsPerWeek)
     .input('layingRatePct', sql.Decimal(5, 2), data.layingRatePct)
-    .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
+    .input('weeklyRevenueAr', sql.Decimal(18, 2), data.weeklyRevenueAr ?? null)
     .query(`INSERT INTO SuiviOeuf
-      (LotId, Week, EggsPerDay, EggsPerWeek, LayingRatePct, Notes, RecordedAt)
+      (LotId, WeekNumber, EggsPerDay, EggsPerWeek, LayingRatePct, WeeklyRevenueAr, CreatedAt)
       OUTPUT
         INSERTED.SuiviOeufId AS suiviOeufId,
         INSERTED.LotId AS lotId,
-        INSERTED.Week AS week,
+        INSERTED.WeekNumber AS week,
         INSERTED.EggsPerDay AS eggsPerDay,
         INSERTED.EggsPerWeek AS eggsPerWeek,
         INSERTED.LayingRatePct AS layingRatePct,
-        INSERTED.Notes AS notes,
-        INSERTED.RecordedAt AS recordedAt
-      VALUES (@lotId, @week, @eggsPerDay, @eggsPerWeek, @layingRatePct, @notes, GETDATE())`);
+        INSERTED.WeeklyRevenueAr AS weeklyRevenueAr,
+        INSERTED.CreatedAt AS createdAt
+      VALUES (@lotId, @weekNumber, @eggsPerDay, @eggsPerWeek, @layingRatePct, @weeklyRevenueAr, GETDATE())`)
   
   return result.recordset[0];
 }
@@ -97,15 +97,15 @@ export async function update(suiviOeufId: number, data: UpdateSuiviOeufDTO): Pro
   }
   if (data.eggsPerWeek !== undefined) {
     updates.push('EggsPerWeek = @eggsPerWeek');
-    request.input('eggsPerWeek', sql.Decimal(10, 2), data.eggsPerWeek);
+    request.input('eggsPerWeek', sql.Int, data.eggsPerWeek);
   }
   if (data.layingRatePct !== undefined) {
     updates.push('LayingRatePct = @layingRatePct');
     request.input('layingRatePct', sql.Decimal(5, 2), data.layingRatePct);
   }
-  if (data.notes !== undefined) {
-    updates.push('Notes = @notes');
-    request.input('notes', sql.NVarChar(sql.MAX), data.notes);
+  if (data.weeklyRevenueAr !== undefined) {
+    updates.push('WeeklyRevenueAr = @weeklyRevenueAr');
+    request.input('weeklyRevenueAr', sql.Decimal(18, 2), data.weeklyRevenueAr);
   }
   
   const result = await request.query(`UPDATE SuiviOeuf
@@ -113,12 +113,12 @@ export async function update(suiviOeufId: number, data: UpdateSuiviOeufDTO): Pro
     OUTPUT
       INSERTED.SuiviOeufId AS suiviOeufId,
       INSERTED.LotId AS lotId,
-      INSERTED.Week AS week,
+      INSERTED.WeekNumber AS week,
       INSERTED.EggsPerDay AS eggsPerDay,
       INSERTED.EggsPerWeek AS eggsPerWeek,
       INSERTED.LayingRatePct AS layingRatePct,
-      INSERTED.Notes AS notes,
-      INSERTED.RecordedAt AS recordedAt
+      INSERTED.WeeklyRevenueAr AS weeklyRevenueAr,
+      INSERTED.CreatedAt AS createdAt
     WHERE SuiviOeufId = @id`);
   
   return result.recordset[0];

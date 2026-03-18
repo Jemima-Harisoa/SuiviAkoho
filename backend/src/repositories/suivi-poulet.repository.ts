@@ -8,17 +8,14 @@ export async function findAll(): Promise<SuiviPoulet[]> {
     .query(`SELECT 
       SuiviPouletId AS suiviPouletId,
       LotId AS lotId,
-      Week AS week,
-      AverageWeightG AS averageWeightG,
-      RationGPerDay AS rationGPerDay,
-      SuppliedRationG AS suppliedRationG,
-      CostPerAr AS costPerAr,
-      Mortality AS mortality,
-      SoldCount AS soldCount,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeekNumber AS week,
+      RemainingCount AS remainingCount,
+      AvgWeightG AS avgWeightG,
+      FeedTotalKg AS feedTotalKg,
+      FeedCostAr AS feedCostAr,
+      CreatedAt AS createdAt
       FROM SuiviPoulet
-      ORDER BY RecordedAt DESC`);
+      ORDER BY CreatedAt DESC`);
   
   return result.recordset;
 }
@@ -30,18 +27,15 @@ export async function findByLot(lotId: number): Promise<SuiviPoulet[]> {
     .query(`SELECT 
       SuiviPouletId AS suiviPouletId,
       LotId AS lotId,
-      Week AS week,
-      AverageWeightG AS averageWeightG,
-      RationGPerDay AS rationGPerDay,
-      SuppliedRationG AS suppliedRationG,
-      CostPerAr AS costPerAr,
-      Mortality AS mortality,
-      SoldCount AS soldCount,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeekNumber AS week,
+      RemainingCount AS remainingCount,
+      AvgWeightG AS avgWeightG,
+      FeedTotalKg AS feedTotalKg,
+      FeedCostAr AS feedCostAr,
+      CreatedAt AS createdAt
       FROM SuiviPoulet
       WHERE LotId = @lotId
-      ORDER BY Week ASC`);
+      ORDER BY WeekNumber ASC`);
   
   return result.recordset;
 }
@@ -54,17 +48,14 @@ export async function findByLotAndWeek(lotId: number, week: number): Promise<Sui
     .query(`SELECT 
       SuiviPouletId AS suiviPouletId,
       LotId AS lotId,
-      Week AS week,
-      AverageWeightG AS averageWeightG,
-      RationGPerDay AS rationGPerDay,
-      SuppliedRationG AS suppliedRationG,
-      CostPerAr AS costPerAr,
-      Mortality AS mortality,
-      SoldCount AS soldCount,
-      Notes AS notes,
-      RecordedAt AS recordedAt
+      WeekNumber AS week,
+      RemainingCount AS remainingCount,
+      AvgWeightG AS avgWeightG,
+      FeedTotalKg AS feedTotalKg,
+      FeedCostAr AS feedCostAr,
+      CreatedAt AS createdAt
       FROM SuiviPoulet
-      WHERE LotId = @lotId AND Week = @week`);
+      WHERE LotId = @lotId AND WeekNumber = @week`);
   
   return result.recordset[0] ?? null;
 }
@@ -73,29 +64,23 @@ export async function create(data: CreateSuiviPouletDTO): Promise<SuiviPoulet> {
   const pool = await getPool();
   const result = await pool.request()
     .input('lotId', sql.Int, data.lotId)
-    .input('week', sql.Int, data.week)
-    .input('averageWeightG', sql.Decimal(10, 2), data.averageWeightG)
-    .input('rationGPerDay', sql.Decimal(10, 2), data.rationGPerDay)
-    .input('suppliedRationG', sql.Decimal(10, 2), data.suppliedRationG)
-    .input('costPerAr', sql.Decimal(15, 2), data.costPerAr)
-    .input('mortality', sql.Int, data.mortality)
-    .input('soldCount', sql.Int, data.soldCount)
-    .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
+    .input('weekNumber', sql.Int, data.week)
+    .input('remainingCount', sql.Int, data.remainingCount ?? 0)
+    .input('avgWeightG', sql.Decimal(10, 2), data.avgWeightG ?? null)
+    .input('feedTotalKg', sql.Decimal(12, 3), data.feedTotalKg ?? null)
+    .input('feedCostAr', sql.Decimal(18, 2), data.feedCostAr ?? null)
     .query(`INSERT INTO SuiviPoulet
-      (LotId, Week, AverageWeightG, RationGPerDay, SuppliedRationG, CostPerAr, Mortality, SoldCount, Notes, RecordedAt)
+      (LotId, WeekNumber, RemainingCount, AvgWeightG, FeedTotalKg, FeedCostAr, CreatedAt)
       OUTPUT
         INSERTED.SuiviPouletId AS suiviPouletId,
         INSERTED.LotId AS lotId,
-        INSERTED.Week AS week,
-        INSERTED.AverageWeightG AS averageWeightG,
-        INSERTED.RationGPerDay AS rationGPerDay,
-        INSERTED.SuppliedRationG AS suppliedRationG,
-        INSERTED.CostPerAr AS costPerAr,
-        INSERTED.Mortality AS mortality,
-        INSERTED.SoldCount AS soldCount,
-        INSERTED.Notes AS notes,
-        INSERTED.RecordedAt AS recordedAt
-      VALUES (@lotId, @week, @averageWeightG, @rationGPerDay, @suppliedRationG, @costPerAr, @mortality, @soldCount, @notes, GETDATE())`);
+        INSERTED.WeekNumber AS week,
+        INSERTED.RemainingCount AS remainingCount,
+        INSERTED.AvgWeightG AS avgWeightG,
+        INSERTED.FeedTotalKg AS feedTotalKg,
+        INSERTED.FeedCostAr AS feedCostAr,
+        INSERTED.CreatedAt AS createdAt
+      VALUES (@lotId, @weekNumber, @remainingCount, @avgWeightG, @feedTotalKg, @feedCostAr, GETDATE())`)
   
   return result.recordset[0];
 }
@@ -106,33 +91,21 @@ export async function update(suiviPouletId: number, data: UpdateSuiviPouletDTO):
   const updates: string[] = [];
   const request = pool.request().input('id', sql.Int, suiviPouletId);
   
-  if (data.averageWeightG !== undefined) {
-    updates.push('AverageWeightG = @averageWeightG');
-    request.input('averageWeightG', sql.Decimal(10, 2), data.averageWeightG);
+  if (data.remainingCount !== undefined) {
+    updates.push('RemainingCount = @remainingCount');
+    request.input('remainingCount', sql.Int, data.remainingCount);
   }
-  if (data.rationGPerDay !== undefined) {
-    updates.push('RationGPerDay = @rationGPerDay');
-    request.input('rationGPerDay', sql.Decimal(10, 2), data.rationGPerDay);
+  if (data.avgWeightG !== undefined) {
+    updates.push('AvgWeightG = @avgWeightG');
+    request.input('avgWeightG', sql.Decimal(10, 2), data.avgWeightG);
   }
-  if (data.suppliedRationG !== undefined) {
-    updates.push('SuppliedRationG = @suppliedRationG');
-    request.input('suppliedRationG', sql.Decimal(10, 2), data.suppliedRationG);
+  if (data.feedTotalKg !== undefined) {
+    updates.push('FeedTotalKg = @feedTotalKg');
+    request.input('feedTotalKg', sql.Decimal(12, 3), data.feedTotalKg);
   }
-  if (data.costPerAr !== undefined) {
-    updates.push('CostPerAr = @costPerAr');
-    request.input('costPerAr', sql.Decimal(15, 2), data.costPerAr);
-  }
-  if (data.mortality !== undefined) {
-    updates.push('Mortality = @mortality');
-    request.input('mortality', sql.Int, data.mortality);
-  }
-  if (data.soldCount !== undefined) {
-    updates.push('SoldCount = @soldCount');
-    request.input('soldCount', sql.Int, data.soldCount);
-  }
-  if (data.notes !== undefined) {
-    updates.push('Notes = @notes');
-    request.input('notes', sql.NVarChar(sql.MAX), data.notes);
+  if (data.feedCostAr !== undefined) {
+    updates.push('FeedCostAr = @feedCostAr');
+    request.input('feedCostAr', sql.Decimal(18, 2), data.feedCostAr);
   }
   
   const result = await request.query(`UPDATE SuiviPoulet
@@ -140,15 +113,12 @@ export async function update(suiviPouletId: number, data: UpdateSuiviPouletDTO):
     OUTPUT
       INSERTED.SuiviPouletId AS suiviPouletId,
       INSERTED.LotId AS lotId,
-      INSERTED.Week AS week,
-      INSERTED.AverageWeightG AS averageWeightG,
-      INSERTED.RationGPerDay AS rationGPerDay,
-      INSERTED.SuppliedRationG AS suppliedRationG,
-      INSERTED.CostPerAr AS costPerAr,
-      INSERTED.Mortality AS mortality,
-      INSERTED.SoldCount AS soldCount,
-      INSERTED.Notes AS notes,
-      INSERTED.RecordedAt AS recordedAt
+      INSERTED.WeekNumber AS week,
+      INSERTED.RemainingCount AS remainingCount,
+      INSERTED.AvgWeightG AS avgWeightG,
+      INSERTED.FeedTotalKg AS feedTotalKg,
+      INSERTED.FeedCostAr AS feedCostAr,
+      INSERTED.CreatedAt AS createdAt
     WHERE SuiviPouletId = @id`);
   
   return result.recordset[0];

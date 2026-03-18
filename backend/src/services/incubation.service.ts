@@ -39,13 +39,13 @@ export async function getIncubationByDateRange(startDate: Date, endDate: Date): 
 }
 
 export async function createIncubation(data: CreateIncubationDTO): Promise<Incubation> {
-  // Validation du lot si fourni
-  if (data.lotId !== undefined && data.lotId !== null && data.lotId <= 0) {
-    throw new Error('LotId doit être positif');
+  // Validation du lot source si fourni
+  if (data.sourceLotId !== undefined && data.sourceLotId !== null && data.sourceLotId <= 0) {
+    throw new Error('SourceLotId doit être positif');
   }
-  if (data.lotId) {
-    const lot = await lotRepository.findById(data.lotId);
-    if (!lot) throw new Error(`Lot non trouvé`);
+  if (data.sourceLotId) {
+    const lot = await lotRepository.findById(data.sourceLotId);
+    if (!lot) throw new Error(`Lot source non trouvé`);
   }
   
   // Validation type incubateur

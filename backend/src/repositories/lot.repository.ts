@@ -10,15 +10,13 @@ export async function findAll(): Promise<Lot[]> {
       LotCode AS lotCode,
       RaceId AS raceId,
       TypeProductionId AS typeProductionId,
-      SexeId AS sexeId,
-      StartDate AS startDate,
+      HatchDate AS hatchDate,
       InitialCount AS initialCount,
       MaleCount AS maleCount,
       FemaleCount AS femaleCount,
       Status AS status,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      PurchaseValue AS purchaseValue,
+      CreatedAt AS createdAt
       FROM Lot
       ORDER BY CreatedAt DESC`);
   
@@ -34,15 +32,13 @@ export async function findById(lotId: number): Promise<Lot | null> {
       LotCode AS lotCode,
       RaceId AS raceId,
       TypeProductionId AS typeProductionId,
-      SexeId AS sexeId,
-      StartDate AS startDate,
+      HatchDate AS hatchDate,
       InitialCount AS initialCount,
       MaleCount AS maleCount,
       FemaleCount AS femaleCount,
       Status AS status,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      PurchaseValue AS purchaseValue,
+      CreatedAt AS createdAt
       FROM Lot
       WHERE LotId = @id`);
   
@@ -58,15 +54,13 @@ export async function findByCode(lotCode: string): Promise<Lot | null> {
       LotCode AS lotCode,
       RaceId AS raceId,
       TypeProductionId AS typeProductionId,
-      SexeId AS sexeId,
-      StartDate AS startDate,
+      HatchDate AS hatchDate,
       InitialCount AS initialCount,
       MaleCount AS maleCount,
       FemaleCount AS femaleCount,
       Status AS status,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      PurchaseValue AS purchaseValue,
+      CreatedAt AS createdAt
       FROM Lot
       WHERE LotCode = @code`);
   
@@ -82,15 +76,13 @@ export async function findByStatus(status: string): Promise<Lot[]> {
       LotCode AS lotCode,
       RaceId AS raceId,
       TypeProductionId AS typeProductionId,
-      SexeId AS sexeId,
-      StartDate AS startDate,
+      HatchDate AS hatchDate,
       InitialCount AS initialCount,
       MaleCount AS maleCount,
       FemaleCount AS femaleCount,
       Status AS status,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      PurchaseValue AS purchaseValue,
+      CreatedAt AS createdAt
       FROM Lot
       WHERE Status = @status
       ORDER BY CreatedAt DESC`);
@@ -107,15 +99,13 @@ export async function findByRace(raceId: number): Promise<Lot[]> {
       LotCode AS lotCode,
       RaceId AS raceId,
       TypeProductionId AS typeProductionId,
-      SexeId AS sexeId,
-      StartDate AS startDate,
+      HatchDate AS hatchDate,
       InitialCount AS initialCount,
       MaleCount AS maleCount,
       FemaleCount AS femaleCount,
       Status AS status,
-      Notes AS notes,
-      CreatedAt AS createdAt,
-      UpdatedAt AS updatedAt
+      PurchaseValue AS purchaseValue,
+      CreatedAt AS createdAt
       FROM Lot
       WHERE RaceId = @raceId
       ORDER BY CreatedAt DESC`);
@@ -129,29 +119,26 @@ export async function create(data: CreateLotDTO): Promise<Lot> {
     .input('code', sql.NVarChar(50), data.lotCode)
     .input('raceId', sql.Int, data.raceId)
     .input('typeProductionId', sql.Int, data.typeProductionId)
-    .input('sexeId', sql.Int, data.sexeId ?? null)
-    .input('startDate', sql.Date, data.startDate)
+    .input('hatchDate', sql.Date, data.hatchDate)
     .input('initialCount', sql.Int, data.initialCount)
     .input('maleCount', sql.Int, data.maleCount)
     .input('femaleCount', sql.Int, data.femaleCount)
-    .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
+    .input('purchaseValue', sql.Decimal(18, 2), data.purchaseValue ?? null)
     .query(`INSERT INTO Lot 
-      (LotCode, RaceId, TypeProductionId, SexeId, StartDate, InitialCount, MaleCount, FemaleCount, Status, Notes, CreatedAt, UpdatedAt)
+      (LotCode, RaceId, TypeProductionId, HatchDate, InitialCount, MaleCount, FemaleCount, Status, PurchaseValue, CreatedAt)
       OUTPUT
         INSERTED.LotId AS lotId,
         INSERTED.LotCode AS lotCode,
         INSERTED.RaceId AS raceId,
         INSERTED.TypeProductionId AS typeProductionId,
-        INSERTED.SexeId AS sexeId,
-        INSERTED.StartDate AS startDate,
+        INSERTED.HatchDate AS hatchDate,
         INSERTED.InitialCount AS initialCount,
         INSERTED.MaleCount AS maleCount,
         INSERTED.FemaleCount AS femaleCount,
         INSERTED.Status AS status,
-        INSERTED.Notes AS notes,
-        INSERTED.CreatedAt AS createdAt,
-        INSERTED.UpdatedAt AS updatedAt
-      VALUES (@code, @raceId, @typeProductionId, @sexeId, @startDate, @initialCount, @maleCount, @femaleCount, 'ACTIF', @notes, GETDATE(), GETDATE())`);
+        INSERTED.PurchaseValue AS purchaseValue,
+        INSERTED.CreatedAt AS createdAt
+      VALUES (@code, @raceId, @typeProductionId, @hatchDate, @initialCount, @maleCount, @femaleCount, 'ACTIF', @purchaseValue, GETDATE())`)
   
   return result.recordset[0];
 }
@@ -170,10 +157,6 @@ export async function update(lotId: number, data: UpdateLotDTO): Promise<Lot> {
     updates.push('TypeProductionId = @typeProductionId');
     request.input('typeProductionId', sql.Int, data.typeProductionId);
   }
-  if (data.sexeId !== undefined) {
-    updates.push('SexeId = @sexeId');
-    request.input('sexeId', sql.Int, data.sexeId);
-  }
   if (data.initialCount !== undefined) {
     updates.push('InitialCount = @initialCount');
     request.input('initialCount', sql.Int, data.initialCount);
@@ -190,12 +173,10 @@ export async function update(lotId: number, data: UpdateLotDTO): Promise<Lot> {
     updates.push('Status = @status');
     request.input('status', sql.NVarChar(20), data.status);
   }
-  if (data.notes !== undefined) {
-    updates.push('Notes = @notes');
-    request.input('notes', sql.NVarChar(sql.MAX), data.notes);
+  if (data.purchaseValue !== undefined) {
+    updates.push('PurchaseValue = @purchaseValue');
+    request.input('purchaseValue', sql.Decimal(18, 2), data.purchaseValue);
   }
-  
-  updates.push('UpdatedAt = GETDATE()');
   
   const result = await request.query(`UPDATE Lot
     SET ${updates.join(', ')}
@@ -204,15 +185,13 @@ export async function update(lotId: number, data: UpdateLotDTO): Promise<Lot> {
       INSERTED.LotCode AS lotCode,
       INSERTED.RaceId AS raceId,
       INSERTED.TypeProductionId AS typeProductionId,
-      INSERTED.SexeId AS sexeId,
-      INSERTED.StartDate AS startDate,
+      INSERTED.HatchDate AS hatchDate,
       INSERTED.InitialCount AS initialCount,
       INSERTED.MaleCount AS maleCount,
       INSERTED.FemaleCount AS femaleCount,
       INSERTED.Status AS status,
-      INSERTED.Notes AS notes,
-      INSERTED.CreatedAt AS createdAt,
-      INSERTED.UpdatedAt AS updatedAt
+      INSERTED.PurchaseValue AS purchaseValue,
+      INSERTED.CreatedAt AS createdAt
     WHERE LotId = @id`);
   
   return result.recordset[0];

@@ -1,6 +1,80 @@
 import * as lotRepository from '../repositories/lot.repository';
 import { Lot, CreateLotDTO, UpdateLotDTO } from '../models/lot.model';
 
+// ============================================================================
+// UTILITAIRES DE GESTION DU CYCLE D'ÉLEVAGE (basés sur Extension.md)
+// ============================================================================
+
+/**
+ * Calcule l'âge du lot en semaines à partir de la date d'éclosion
+ * @param hatchDate Date d'éclosion du lot (Jour 0)
+ * @returns Nombre de semaines complètes depuis l'éclosion
+ */
+function calculateLotAgeWeeks(hatchDate: Date): number {
+  const today = new Date();
+  const diffMs = today.getTime() - hatchDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.floor(diffDays / 7);
+}
+
+/**
+ * Détermine l'état de ponte du lot selon son âge
+ * (Extension.md section 2: "Début de ponte: 20-24 semaines")
+ * @param ageWeeks Âge du lot en semaines
+ * @returns État: 'PRE_PONTE' | 'PONTE' | 'POST_PONTE'
+ */
+function determineLayingStage(ageWeeks: number): 'PRE_PONTE' | 'PONTE' | 'POST_PONTE' {
+  if (ageWeeks < 20) return 'PRE_PONTE';
+  if (ageWeeks <= 72) return 'PONTE'; // ~18 mois de production
+  return 'POST_PONTE';
+}
+
+/**
+ * Vérifie si le lot peut produire des œufs
+ * @param lot Le lot à vérifier
+ * @returns true si le lot est en phase ponte et actif
+ */
+function canLotProduce(lot: Lot): boolean {
+  if (lot.status !== 'ACTIF') return false;
+  const ageWeeks = calculateLotAgeWeeks(lot.hatchDate);
+  return ageWeeks >= 20 && ageWeeks <= 72;
+}
+
+/**
+ * Parse et valide une date d'éclosion
+ * @param dateInput String (ISO) ou objet Date
+ * @returns Date validée et parsée
+ */
+function parseDateInput(dateInput: string | Date): Date {
+  let date: Date;
+  
+  if (typeof dateInput === 'string') {
+    date = new Date(dateInput);
+  } else if (dateInput instanceof Date) {
+    date = dateInput;
+  } else {
+    throw new Error('Date d\'éclosion invalide: doit être string (ISO) ou Date');
+  }
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Date d\'éclosion invalide: format incorrect');
+  }
+
+  // Vérifier que la date n'est pas dans le futur
+  if (date > new Date()) {
+    throw new Error('Date d\'éclosion ne peut pas être dans le futur');
+  }
+
+  // Vérifier que la date n'est pas trop ancienne (max 5 ans)
+  const maxAgeMs = 5 * 365 * 24 * 60 * 60 * 1000;
+  const ageMs = new Date().getTime() - date.getTime();
+  if (ageMs > maxAgeMs) {
+    throw new Error('Date d\'éclosion: lot trop ancien (> 5 ans)');
+  }
+
+  return date;
+}
+
 export async function getAllLots(): Promise<Lot[]> {
   return lotRepository.findAll();
 }
@@ -54,12 +128,17 @@ export async function createLot(data: CreateLotDTO): Promise<Lot> {
     throw new Error(`Un lot avec le code ${data.lotCode} existe déjà`);
   }
   
-  // Valider la date
-  if (!(data.startDate instanceof Date) || isNaN(data.startDate.getTime())) {
-    throw new Error('Date de démarrage invalide');
-  }
+  // Valider et parser la date d'éclosion
+  // (accepte string ISO "2026-03-18" ou objet Date)
+  const parsedDate = parseDateInput(data.hatchDate as any);
   
-  return lotRepository.create(data);
+  // Créer le lot avec la date parsée
+  const createData: CreateLotDTO = {
+    ...data,
+    hatchDate: parsedDate
+  };
+  
+  return lotRepository.create(createData);
 }
 
 export async function updateLot(lotId: number, data: UpdateLotDTO): Promise<Lot> {
@@ -107,3 +186,14 @@ export async function deleteLot(lotId: number): Promise<void> {
 export async function closeLot(lotId: number): Promise<Lot> {
   return updateLot(lotId, { status: 'CLOTURE' });
 }
+
+// ============================================================================
+// EXPORTS DES UTILITAIRES (pour usage dans autres services)
+// ============================================================================
+
+export {
+  calculateLotAgeWeeks,
+  determineLayingStage,
+  canLotProduce,
+  parseDateInput
+};
