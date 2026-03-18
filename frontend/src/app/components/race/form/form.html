@@ -6,6 +6,7 @@
   </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="race-form">
+    <!-- Nom de la race -->
     <div class="form-group">
       <label for="name">Nom de la race *</label>
       <input
@@ -21,20 +22,47 @@
       </div>
     </div>
 
+    <!-- Propriétés dynamiques -->
     <div class="form-group">
-      <label for="descriptionJson">Description JSON</label>
-      <textarea
-        id="descriptionJson"
-        formControlName="descriptionJson"
-        rows="10"
-        placeholder='Entrez un JSON valide, ex: {"origine":"France","type":"pondeuse"}'
-        class="form-input"
-      ></textarea>
-      <div *ngIf="form.get('descriptionJson')?.invalid && form.get('descriptionJson')?.touched" class="error-text">
-        <span>Veuillez entrer un JSON valide</span>
+      <label>Description (propriétés) <span class="optional">(optionnel)</span></label>
+
+      <div formArrayName="properties" class="properties-list">
+        <div *ngFor="let property of properties.controls; let i = index" class="property-row">
+          <div [formGroupName]="i" class="property-inputs">
+            <input
+              type="text"
+              formControlName="key"
+              placeholder="Clé (ex: couleur)"
+              class="form-input"
+            />
+            <input
+              type="text"
+              formControlName="value"
+              placeholder="Valeur (ex: noir)"
+              class="form-input"
+            />
+            <button
+              type="button"
+              (click)="removeProperty(i)"
+              class="btn btn-danger"
+              title="Supprimer cette propriété"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       </div>
+
+      <button
+        type="button"
+        (click)="addProperty()"
+        class="btn btn-secondary"
+      >
+        + Ajouter une propriété
+      </button>
     </div>
 
+    <!-- Boutons d'action -->
     <div class="form-actions">
       <button type="submit" [disabled]="!form.valid || loading" class="btn btn-primary">
         {{ loading ? 'Création en cours...' : 'Créer la race' }}

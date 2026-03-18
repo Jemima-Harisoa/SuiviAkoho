@@ -125,3 +125,55 @@ textarea.form-input {
     background-color: #555;
   }
 }
+
+.btn-danger {
+  padding: 8px 12px;
+  background-color: #dc3545;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+
+  &:hover:not(:disabled) {
+    background-color: #c82333;
+  }
+}
+
+.optional {
+  font-weight: normal;
+  color: #999;
+  font-size: 12px;
+}
+
+.properties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.property-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.property-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 40px;
+  gap: 10px;
+  align-items: flex-end;
+
+  .form-input {
+    margin: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .property-inputs {
+    grid-template-columns: 1fr;
+
+    .btn {
+      padding: 8px 12px;
+    }
+  }
+}

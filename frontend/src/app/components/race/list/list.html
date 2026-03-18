@@ -20,14 +20,21 @@
       <tr>
         <th>ID</th>
         <th>Nom </th>
+        <th>Description</th>
         <th>Date de creation</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let race of races" >
-        <td>{{ race.raceId  }}</td>
-        <td>{{ race.name  }}</td>
-        <td>{{ race.createdAt  | date:'short'  }}</td>
+        <td class="id">{{ race.raceId  }}</td>
+        <td class="name">{{ race.name  }}</td>
+        <td class="description">
+          <div *ngIf="race.descriptionJson" class="json-display">
+            {{ race.descriptionJson | json }}
+          </div>
+          <div *ngIf="!race.descriptionJson" class="empty">—</div>
+        </td>
+        <td class="date">{{ race.createdAt  | date:'short'  }}</td>
       </tr>
     </tbody>
   </table>

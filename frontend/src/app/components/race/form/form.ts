@@ -59,7 +59,7 @@ export class FormComponent implements OnInit {
     this.messageType = null;
 
     const name = this.form.get('name')?.value?.trim();
-    
+
     // Build descriptionJson from properties
     const descriptionJson: Record<string, any> = {};
     this.properties.value.forEach((prop: { key: string; value: any }) => {
