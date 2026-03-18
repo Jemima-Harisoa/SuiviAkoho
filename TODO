@@ -249,9 +249,9 @@ backend/src/
 
 #### Commercial
 - **`models/production.model.ts`** — `Production`, `CreateProductionDto`, `UpdateProductionDto`
-- **`models/historique-vente.model.ts`** — `HistoriqueVente`, `CreateHistoriqueVenteDto`
+- **`models/historique-gain.model.ts`** — `HistoriqueVente`, `CreateHistoriqueVenteDto`
 - **`models/prevision.model.ts`** — `Prevision`, `CreatePrevisionDto`, `UpdatePrevisionDto`
-- **`models/historique-achat.model.ts`** — `HistoriqueAchat`, `CreateHistoriqueAchatDto`
+- **`models/historique-perte.model.ts`** — `HistoriqueAchat`, `CreateHistoriqueAchatDto`
 
 ---
 

@@ -16,6 +16,11 @@ import suiviOeufRoutes from './suivi-oeuf.routes';
 import traitementOeufsRoutes from './traitement-oeufs.routes';
 import incubationRoutes from './incubation.routes';
 
+// Routes d'historique
+import historiqueSuiviPouletRoutes from './historique-suivi-poulet.routes';
+import historiqueSuiviOeufRoutes from './historique-suivi-oeuf.routes';
+import historiqueIncubationRoutes from './historique-incubation.routes';
+
 const router = Router();
 
 // RÉFÉRENCE - Endpoints statiques
@@ -33,5 +38,10 @@ router.use('/api/suivi-poulet', suiviPouletRoutes);
 router.use('/api/suivi-oeuf', suiviOeufRoutes);
 router.use('/api/traitement-oeufs', traitementOeufsRoutes);
 router.use('/api/incubations', incubationRoutes);
+
+// HISTORIQUE - Endpoints de suivi temporel
+router.use('/api/historique-suivi-poulet', historiqueSuiviPouletRoutes);
+router.use('/api/historique-suivi-oeuf', historiqueSuiviOeufRoutes);
+router.use('/api/historique-incubation', historiqueIncubationRoutes);
 
 export default router;

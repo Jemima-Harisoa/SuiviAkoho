@@ -1,0 +1,554 @@
+{
+  "info": {
+    "name": "SuiviAkoho - Historique API",
+    "description": "Collection pour tester les endpoints d'historique - enregistrement des évolutions des suivis et incubations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "inherit"
+  },
+  "item": [
+    {
+      "name": "1. HISTORIQUE SUIVI POULET",
+      "item": [
+        {
+          "name": "POST - Enregistrer Historique (Poids)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"suiviPouletId\": 1,\n  \"weekNumber\": 1,\n  \"densiteActuelle\": 98,\n  \"poidsActuelle\": 155,\n  \"raionSemaine\": 20,\n  \"coutAliment\": 60000,\n  \"valeurLotAr\": 225000,\n  \"eventType\": \"WEEK_OBSERVATION\",\n  \"notes\": \"Observation hebdomadaire - Lot en bonne santé\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet"]
+            }
+          }
+        },
+        {
+          "name": "POST - Enregistrer Mortalité",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"suiviPouletId\": 1,\n  \"weekNumber\": 2,\n  \"densiteActuelle\": 96,\n  \"poidsActuelle\": 310,\n  \"raionSemaine\": 35,\n  \"coutAliment\": 105000,\n  \"valeurLotAr\": 441000,\n  \"eventType\": \"MORTALITE\",\n  \"notes\": \"2 poulets morts cette semaine - cause: maladie respiratoire\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet"]
+            }
+          }
+        },
+        {
+          "name": "GET - Tous les Historiques Poulet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Lot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet/lot/1?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet", "lot", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Type Événement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet/event/MORTALITE?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet", "event", "MORTALITE"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet/date-range?startDate=2026-03-01&endDate=2026-03-20&page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-03-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-03-20"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. HISTORIQUE SUIVI OEUF",
+      "item": [
+        {
+          "name": "POST - Enregistrer Historique (Production)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"dateEntree\": \"2026-03-18\",\n  \"eggsPerDay\": 60,\n  \"eggsPerWeek\": 418,\n  \"layingRatePct\": 60,\n  \"weeklyRevenueAr\": 250800,\n  \"notes\": \"Production stable, bonne qualité des coquilles\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Enregistrer Anomalie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"dateEntree\": \"2026-03-19\",\n  \"eggsPerDay\": 58,\n  \"eggsPerWeek\": 401,\n  \"layingRatePct\": 58,\n  \"weeklyRevenueAr\": 240600,\n  \"notes\": \"Baisse de production détectée - cause probable: stress thermique\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf", "create"]
+            }
+          }
+        },
+        {
+          "name": "GET - Tous les Historiques Oeuf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Suivi Oeuf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf/suivi/1?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf", "suivi", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique Oeuf par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-oeuf/date-range?startDate=2026-03-01&endDate=2026-03-20&page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-oeuf", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-03-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-03-20"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. HISTORIQUE INCUBATION",
+      "item": [
+        {
+          "name": "POST - Enregistrer Démarrage Incubation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incubationId\": 1,\n  \"dateEntree\": \"2026-03-01\",\n  \"incubatorType\": \"MODERNE\",\n  \"eggsSetCount\": 500,\n  \"notes\": \"500 œufs mis en couveuse - démarrage incubation\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Enregistrer Éclosion Partielle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incubationId\": 1,\n  \"dateEntree\": \"2026-03-22\",\n  \"incubatorType\": \"MODERNE\",\n  \"eggsSetCount\": 500,\n  \"eggsHatchedCount\": 400,\n  \"createdLotId\": 3,\n  \"notes\": \"400 poussins éclos (80% de réussite)\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Enregistrer Perte d'Œufs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incubationId\": 1,\n  \"dateEntree\": \"2026-03-22\",\n  \"incubatorType\": \"MODERNE\",\n  \"eggsSetCount\": 500,\n  \"eggsHatchedCount\": 400,\n  \"hatchRatePct\": 80,\n  \"createdLotId\": 3,\n  \"notes\": \"100 œufs perdus - mortalité embryonnaire (20%)\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "create"]
+            }
+          }
+        },
+        {
+          "name": "GET - Tous les Historiques Incubation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Incubation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/incubation/1?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "incubation", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique Incubation par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Historique par Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/date-range?startDate=2026-03-01&endDate=2026-03-25&page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-03-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-03-25"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. SCÉNARIOS DE TEST COMPLETS",
+      "item": [
+        {
+          "name": "Scénario 1 - Suivi Poulet Complet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"suiviPouletId\": 1,\n  \"weekNumber\": 3,\n  \"densiteActuelle\": 94,\n  \"poidsActuelle\": 600,\n  \"raionSemaine\": 60,\n  \"coutAliment\": 180000,\n  \"valeurLotAr\": 873000,\n  \"eventType\": \"WEEK_OBSERVATION\",\n  \"notes\": \"Semaine 3 - Croissance normale, densité adaptée, pas de problème de santé\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet"]
+            }
+          }
+        },
+        {
+          "name": "Scénario 2 - Traitement Médical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"suiviPouletId\": 1,\n  \"weekNumber\": 4,\n  \"densiteActuelle\": 92,\n  \"poidsActuelle\": 950,\n  \"raionSemaine\": 80,\n  \"coutAliment\": 240000,\n  \"valeurLotAr\": 1440000,\n  \"eventType\": \"TRAITEMENT_MEDICAL\",\n  \"notes\": \"Antibiotiques administrés - infection respiratoire détectée et traitée\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-suivi-poulet",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-suivi-poulet"]
+            }
+          }
+        },
+        {
+          "name": "Scénario 3 - Incubation Complète",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incubationId\": 2,\n  \"dateEntree\": \"2026-03-08\",\n  \"incubatorType\": \"MODERNE\",\n  \"eggsSetCount\": 300,\n  \"eggsHatchedCount\": 255,\n  \"hatchRatePct\": 85,\n  \"createdLotId\": 4,\n  \"notes\": \"Incubation réussie - 255 poussins éclos (85%), 30 perdus (10%), 15 non viables (5%)\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/historique-incubation/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "historique-incubation", "create"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
