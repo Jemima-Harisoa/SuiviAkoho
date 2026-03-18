@@ -19,7 +19,7 @@ export async function findAll(): Promise<Lot[]> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Lot
+      FROM Lot
       ORDER BY CreatedAt DESC`);
   
   return result.recordset;
@@ -43,7 +43,7 @@ export async function findById(lotId: number): Promise<Lot | null> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Lot
+      FROM Lot
       WHERE LotId = @id`);
   
   return result.recordset[0] ?? null;
@@ -67,7 +67,7 @@ export async function findByCode(lotCode: string): Promise<Lot | null> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Lot
+      FROM Lot
       WHERE LotCode = @code`);
   
   return result.recordset[0] ?? null;
@@ -91,7 +91,7 @@ export async function findByStatus(status: string): Promise<Lot[]> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Lot
+      FROM Lot
       WHERE Status = @status
       ORDER BY CreatedAt DESC`);
   
@@ -116,7 +116,7 @@ export async function findByRace(raceId: number): Promise<Lot[]> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Lot
+      FROM Lot
       WHERE RaceId = @raceId
       ORDER BY CreatedAt DESC`);
   
@@ -135,7 +135,7 @@ export async function create(data: CreateLotDTO): Promise<Lot> {
     .input('maleCount', sql.Int, data.maleCount)
     .input('femaleCount', sql.Int, data.femaleCount)
     .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
-    .query(`INSERT INTO elevage.Lot 
+    .query(`INSERT INTO Lot 
       (LotCode, RaceId, TypeProductionId, SexeId, StartDate, InitialCount, MaleCount, FemaleCount, Status, Notes, CreatedAt, UpdatedAt)
       OUTPUT
         INSERTED.LotId AS lotId,
@@ -197,7 +197,7 @@ export async function update(lotId: number, data: UpdateLotDTO): Promise<Lot> {
   
   updates.push('UpdatedAt = GETDATE()');
   
-  const result = await request.query(`UPDATE elevage.Lot
+  const result = await request.query(`UPDATE Lot
     SET ${updates.join(', ')}
     OUTPUT
       INSERTED.LotId AS lotId,
@@ -222,5 +222,5 @@ export async function delete$(lotId: number): Promise<void> {
   const pool = await getPool();
   await pool.request()
     .input('id', sql.Int, lotId)
-    .query(`DELETE FROM elevage.Lot WHERE LotId = @id`);
+    .query(`DELETE FROM Lot WHERE LotId = @id`);
 }

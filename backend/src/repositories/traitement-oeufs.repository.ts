@@ -13,7 +13,7 @@ export async function findAll(): Promise<TraitementOeufs[]> {
       UnitPrice AS unitPrice,
       TotalAmountAr AS totalAmountAr,
       CreatedAt AS createdAt
-      FROM elevage.TraitementOeufs
+      FROM TraitementOeufs
       ORDER BY CreatedAt DESC`);
   
   return result.recordset;
@@ -31,7 +31,7 @@ export async function findBySuiviOeuf(suiviOeufId: number): Promise<TraitementOe
       UnitPrice AS unitPrice,
       TotalAmountAr AS totalAmountAr,
       CreatedAt AS createdAt
-      FROM elevage.TraitementOeufs
+      FROM TraitementOeufs
       WHERE SuiviOeufId = @suiviOeufId
       ORDER BY CreatedAt DESC`);
   
@@ -50,7 +50,7 @@ export async function findByType(treatmentType: string): Promise<TraitementOeufs
       UnitPrice AS unitPrice,
       TotalAmountAr AS totalAmountAr,
       CreatedAt AS createdAt
-      FROM elevage.TraitementOeufs
+      FROM TraitementOeufs
       WHERE TreatmentType = @type
       ORDER BY CreatedAt DESC`);
   
@@ -65,7 +65,7 @@ export async function create(data: CreateTraitementOeufsDTO): Promise<Traitement
     .input('count', sql.Int, data.count)
     .input('unitPrice', sql.Decimal(15, 2), data.unitPrice ?? null)
     .input('totalAmountAr', sql.Decimal(15, 2), data.totalAmountAr ?? null)
-    .query(`INSERT INTO elevage.TraitementOeufs
+    .query(`INSERT INTO TraitementOeufs
       (SuiviOeufId, TreatmentType, Count, UnitPrice, TotalAmountAr, CreatedAt)
       OUTPUT
         INSERTED.TraitementId AS traitementId,
@@ -84,5 +84,5 @@ export async function delete$(traitementId: number): Promise<void> {
   const pool = await getPool();
   await pool.request()
     .input('id', sql.Int, traitementId)
-    .query(`DELETE FROM elevage.TraitementOeufs WHERE TraitementId = @id`);
+    .query(`DELETE FROM TraitementOeufs WHERE TraitementId = @id`);
 }

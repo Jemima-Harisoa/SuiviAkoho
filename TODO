@@ -21,7 +21,7 @@
 
 ### ✅ Déjà fait
 - [x] Docker + SQL Server opérationnel (port 1433)
-- [x] Schéma BDD complet — toutes les tables `elevage.*` créées
+- [x] Schéma BDD complet — toutes les tables `*` créées
 - [x] Données de référence insérées (Sexe, TypeProduction, Race, PhaseAlimentation, Unite, Parametre)
 - [x] Backend : endpoint Race (GET /api/races · POST /api/races) fonctionnel
 
@@ -64,16 +64,16 @@
 ### Tables BDD — Vue d'ensemble
 
 **Référence** *(données fixes, déjà insérées)*
-`elevage.Sexe` · `elevage.TypeProduction` · `elevage.Race` · `elevage.PhaseAlimentation` · `elevage.ReferenceCompositionAliment` · `elevage.Unite` · `elevage.Parametre`
+`Sexe` · `TypeProduction` · `Race` · `PhaseAlimentation` · `ReferenceCompositionAliment` · `Unite` · `Parametre`
 
 **Métier** *(données vivantes)*
-`elevage.Lot` ← entité centrale · `elevage.Incubation` · `elevage.SuiviPoulet` · `elevage.SuiviOeuf` · `elevage.TraitementOeufs`
+`Lot` ← entité centrale · `Incubation` · `SuiviPoulet` · `SuiviOeuf` · `TraitementOeufs`
 
 **Historique**
-`elevage.HistoriqueSuiviPoulet` · `elevage.HistoriqueSuiviOeuf` · `elevage.HistoriqueIncubation`
+`HistoriqueSuiviPoulet` · `HistoriqueSuiviOeuf` · `HistoriqueIncubation`
 
 **Commercial**
-`elevage.Production` · `elevage.HistoriqueVente` · `elevage.Prevision` · `elevage.HistoriqueAchat`
+`Production` · `HistoriqueVente` · `Prevision` · `HistoriqueAchat`
 
 ### Règles Métier à Connaître
 
@@ -156,7 +156,7 @@ coverage/
 
 - [ ] `docker ps` → conteneur `sqlserver` visible et `healthy`
 - [ ] Connexion Azure Data Studio → localhost:1433, user: sa
-- [ ] Tables `elevage.*` visibles avec données de référence
+- [ ] Tables `*` visibles avec données de référence
 - [ ] `cd backend && npm install && npm run dev` → serveur démarre sans erreur
 - [ ] `GET http://localhost:3000/api/races` → retourne la liste des races en JSON
 
@@ -752,11 +752,11 @@ if (maleCount + femaleCount > initialCount) throw new Error('...');
 
 ```typescript
 // ❌ Dangereux — injection SQL possible
-`SELECT * FROM elevage.Lot WHERE LotCode = '${code}'`
+`SELECT * FROM Lot WHERE LotCode = '${code}'`
 
 // ✅ Sécurisé
 request.input('code', sql.NVarChar, code);
-`SELECT * FROM elevage.Lot WHERE LotCode = @code`
+`SELECT * FROM Lot WHERE LotCode = @code`
 ```
 
 ### 7 — Variables d'environnement

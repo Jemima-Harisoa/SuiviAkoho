@@ -14,7 +14,7 @@ export async function findAll(): Promise<SuiviOeuf[]> {
       LayingRatePct AS layingRatePct,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviOeuf
+      FROM SuiviOeuf
       ORDER BY RecordedAt DESC`);
   
   return result.recordset;
@@ -33,7 +33,7 @@ export async function findByLot(lotId: number): Promise<SuiviOeuf[]> {
       LayingRatePct AS layingRatePct,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviOeuf
+      FROM SuiviOeuf
       WHERE LotId = @lotId
       ORDER BY Week ASC`);
   
@@ -54,7 +54,7 @@ export async function findByLotAndWeek(lotId: number, week: number): Promise<Sui
       LayingRatePct AS layingRatePct,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviOeuf
+      FROM SuiviOeuf
       WHERE LotId = @lotId AND Week = @week`);
   
   return result.recordset[0] ?? null;
@@ -69,7 +69,7 @@ export async function create(data: CreateSuiviOeufDTO): Promise<SuiviOeuf> {
     .input('eggsPerWeek', sql.Decimal(10, 2), data.eggsPerWeek)
     .input('layingRatePct', sql.Decimal(5, 2), data.layingRatePct)
     .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
-    .query(`INSERT INTO elevage.SuiviOeuf
+    .query(`INSERT INTO SuiviOeuf
       (LotId, Week, EggsPerDay, EggsPerWeek, LayingRatePct, Notes, RecordedAt)
       OUTPUT
         INSERTED.SuiviOeufId AS suiviOeufId,
@@ -108,7 +108,7 @@ export async function update(suiviOeufId: number, data: UpdateSuiviOeufDTO): Pro
     request.input('notes', sql.NVarChar(sql.MAX), data.notes);
   }
   
-  const result = await request.query(`UPDATE elevage.SuiviOeuf
+  const result = await request.query(`UPDATE SuiviOeuf
     SET ${updates.join(', ')}
     OUTPUT
       INSERTED.SuiviOeufId AS suiviOeufId,
@@ -128,5 +128,5 @@ export async function delete$(suiviOeufId: number): Promise<void> {
   const pool = await getPool();
   await pool.request()
     .input('id', sql.Int, suiviOeufId)
-    .query(`DELETE FROM elevage.SuiviOeuf WHERE SuiviOeufId = @id`);
+    .query(`DELETE FROM SuiviOeuf WHERE SuiviOeufId = @id`);
 }

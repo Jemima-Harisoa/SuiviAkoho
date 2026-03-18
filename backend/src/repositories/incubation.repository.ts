@@ -17,7 +17,7 @@ export async function findAll(): Promise<Incubation[]> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Incubation
+      FROM Incubation
       ORDER BY CreatedAt DESC`);
   
   return result.recordset;
@@ -39,7 +39,7 @@ export async function findById(incubationId: number): Promise<Incubation | null>
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Incubation
+      FROM Incubation
       WHERE IncubationId = @id`);
   
   return result.recordset[0] ?? null;
@@ -61,7 +61,7 @@ export async function findByLot(lotId: number): Promise<Incubation[]> {
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Incubation
+      FROM Incubation
       WHERE LotId = @lotId
       ORDER BY CreatedAt DESC`);
   
@@ -85,7 +85,7 @@ export async function findByDateRange(startDate: Date, endDate: Date): Promise<I
       Notes AS notes,
       CreatedAt AS createdAt,
       UpdatedAt AS updatedAt
-      FROM elevage.Incubation
+      FROM Incubation
       WHERE StartDate BETWEEN @start AND @end
       ORDER BY CreatedAt DESC`);
   
@@ -106,7 +106,7 @@ export async function create(data: CreateIncubationDTO): Promise<Incubation> {
     .input('eggsSetCount', sql.Int, data.eggsSetCount)
     .input('expectedHatchDate', sql.Date, expectedHatchDate)
     .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
-    .query(`INSERT INTO elevage.Incubation
+    .query(`INSERT INTO Incubation
       (LotId, IncubatorType, StartDate, EggsSetCount, ExpectedHatchDate, Notes, CreatedAt, UpdatedAt)
       OUTPUT
         INSERTED.IncubationId AS incubationId,
@@ -142,7 +142,7 @@ export async function update(incubationId: number, data: UpdateIncubationDTO): P
   
   updates.push('UpdatedAt = GETDATE()');
   
-  const result = await request.query(`UPDATE elevage.Incubation
+  const result = await request.query(`UPDATE Incubation
     SET ${updates.join(', ')}
     OUTPUT
       INSERTED.IncubationId AS incubationId,
@@ -165,5 +165,5 @@ export async function delete$(incubationId: number): Promise<void> {
   const pool = await getPool();
   await pool.request()
     .input('id', sql.Int, incubationId)
-    .query(`DELETE FROM elevage.Incubation WHERE IncubationId = @id`);
+    .query(`DELETE FROM Incubation WHERE IncubationId = @id`);
 }

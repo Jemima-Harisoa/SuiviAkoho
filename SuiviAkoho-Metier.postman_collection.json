@@ -1,0 +1,613 @@
+{
+  "info": {
+    "name": "SuiviAkoho - Métier API",
+    "description": "Collection des endpoints métier pour le suivi avicole",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "inherit"
+  },
+  "item": [
+    {
+      "name": "1. LOT",
+      "item": [
+        {
+          "name": "GET - Tous les lots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots"]
+            }
+          }
+        },
+        {
+          "name": "GET - Lot par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Lot par Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/code/LOT001",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "code", "LOT001"]
+            }
+          }
+        },
+        {
+          "name": "GET - Lots par Statut",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/status/ACTIF",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "status", "ACTIF"]
+            }
+          }
+        },
+        {
+          "name": "GET - Lots par Race",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/race/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "race", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Lot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotCode\": \"LOT001\",\n  \"raceId\": 1,\n  \"typeProductionId\": 1,\n  \"sexeId\": 1,\n  \"startDate\": \"2026-03-18\",\n  \"initialCount\": 100,\n  \"maleCount\": 30,\n  \"femaleCount\": 70,\n  \"status\": \"ACTIF\",\n  \"notes\": \"Premier lot de l'année\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/lots/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "create"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Mettre à jour Lot",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maleCount\": 25,\n  \"femaleCount\": 75,\n  \"notes\": \"Mise à jour du lot\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/lots/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST - Clôturer Lot",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/1/close",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "1", "close"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer Lot",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lots/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lots", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. SUIVI POULET",
+      "item": [
+        {
+          "name": "GET - Tous les suivis poulet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet"]
+            }
+          }
+        },
+        {
+          "name": "GET - Suivi poulet par Lot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/lot/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "lot", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Suivi poulet par Lot et Semaine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/lot/1/week/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "lot", "1", "week", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Suivi Poulet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"week\": 1,\n  \"averageWeightG\": 250,\n  \"rationGPerDay\": 25,\n  \"suppliedRationG\": 500,\n  \"costPerAr\": 150,\n  \"mortality\": 2,\n  \"soldCount\": 0,\n  \"notes\": \"Première semaine ok\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "create"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Mettre à jour Suivi Poulet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"averageWeightG\": 260,\n  \"mortality\": 3,\n  \"notes\": \"Mise à jour\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer Suivi Poulet",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-poulet/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-poulet", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. SUIVI ŒUF",
+      "item": [
+        {
+          "name": "GET - Tous les suivis œuf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf"]
+            }
+          }
+        },
+        {
+          "name": "GET - Suivi œuf par Lot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/lot/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "lot", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Suivi œuf par Lot et Semaine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/lot/1/week/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "lot", "1", "week", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Suivi Œuf",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"week\": 1,\n  \"eggsPerDay\": 45,\n  \"eggsPerWeek\": 315,\n  \"layingRatePct\": 64.3,\n  \"notes\": \"Taux de ponte bon\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "create"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Mettre à jour Suivi Œuf",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eggsPerDay\": 48,\n  \"eggsPerWeek\": 336,\n  \"layingRatePct\": 68.6\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer Suivi Œuf",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/suivi-oeuf/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "suivi-oeuf", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. TRAITEMENT ŒUFS",
+      "item": [
+        {
+          "name": "GET - Tous les traitements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs"]
+            }
+          }
+        },
+        {
+          "name": "GET - Traitement par Suivi Œuf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs/suivi/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs", "suivi", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Traitement par Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs/type/VENTE",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs", "type", "VENTE"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Traitement (VENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"treatmentType\": \"VENTE\",\n  \"count\": 200,\n  \"unitPrice\": 500,\n  \"totalAmountAr\": 100000\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs", "create"]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Traitement (INCUBATION)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suiviOeufId\": 1,\n  \"treatmentType\": \"INCUBATION\",\n  \"count\": 115\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs", "create"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer Traitement",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/traitement-oeufs/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "traitement-oeufs", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. INCUBATION",
+      "item": [
+        {
+          "name": "GET - Tous les incubations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/incubations",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations"]
+            }
+          }
+        },
+        {
+          "name": "GET - Incubation par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Incubation par Lot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/lot/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "lot", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET - Incubations par Plage de Dates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/range?startDate=2026-01-01&endDate=2026-12-31",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST - Créer Incubation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"incubatorType\": \"INCUBATEUR_STATIQUE\",\n  \"startDate\": \"2026-03-18\",\n  \"eggsSetCount\": 115,\n  \"notes\": \"Première fournée d'incubation\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "create"]
+            }
+          }
+        },
+        {
+          "name": "PUT - Mettre à jour Incubation (enregistrer éclosion)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hatchedCount\": 105,\n  \"notes\": \"Éclosion réussie\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer Incubation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/incubations/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "incubations", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

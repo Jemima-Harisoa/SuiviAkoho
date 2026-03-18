@@ -17,7 +17,7 @@ export async function findAll(): Promise<SuiviPoulet[]> {
       SoldCount AS soldCount,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviPoulet
+      FROM SuiviPoulet
       ORDER BY RecordedAt DESC`);
   
   return result.recordset;
@@ -39,7 +39,7 @@ export async function findByLot(lotId: number): Promise<SuiviPoulet[]> {
       SoldCount AS soldCount,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviPoulet
+      FROM SuiviPoulet
       WHERE LotId = @lotId
       ORDER BY Week ASC`);
   
@@ -63,7 +63,7 @@ export async function findByLotAndWeek(lotId: number, week: number): Promise<Sui
       SoldCount AS soldCount,
       Notes AS notes,
       RecordedAt AS recordedAt
-      FROM elevage.SuiviPoulet
+      FROM SuiviPoulet
       WHERE LotId = @lotId AND Week = @week`);
   
   return result.recordset[0] ?? null;
@@ -81,7 +81,7 @@ export async function create(data: CreateSuiviPouletDTO): Promise<SuiviPoulet> {
     .input('mortality', sql.Int, data.mortality)
     .input('soldCount', sql.Int, data.soldCount)
     .input('notes', sql.NVarChar(sql.MAX), data.notes ?? null)
-    .query(`INSERT INTO elevage.SuiviPoulet
+    .query(`INSERT INTO SuiviPoulet
       (LotId, Week, AverageWeightG, RationGPerDay, SuppliedRationG, CostPerAr, Mortality, SoldCount, Notes, RecordedAt)
       OUTPUT
         INSERTED.SuiviPouletId AS suiviPouletId,
@@ -135,7 +135,7 @@ export async function update(suiviPouletId: number, data: UpdateSuiviPouletDTO):
     request.input('notes', sql.NVarChar(sql.MAX), data.notes);
   }
   
-  const result = await request.query(`UPDATE elevage.SuiviPoulet
+  const result = await request.query(`UPDATE SuiviPoulet
     SET ${updates.join(', ')}
     OUTPUT
       INSERTED.SuiviPouletId AS suiviPouletId,
@@ -158,5 +158,5 @@ export async function delete$(suiviPouletId: number): Promise<void> {
   const pool = await getPool();
   await pool.request()
     .input('id', sql.Int, suiviPouletId)
-    .query(`DELETE FROM elevage.SuiviPoulet WHERE SuiviPouletId = @id`);
+    .query(`DELETE FROM SuiviPoulet WHERE SuiviPouletId = @id`);
 }
