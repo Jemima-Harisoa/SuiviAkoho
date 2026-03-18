@@ -6,6 +6,10 @@ import { getPool } from './config/database.config';
 import raceRoutes from './routes/race.routes';
 import sexeRoutes from './routes/sexe.routes';
 import typeProductionRoutes from './routes/type-production.routes';
+import phaseAlimentationRoutes from './routes/phase-alimentation.routes';
+import referenceCompositionAlimentRoutes from './routes/reference-composition-aliment.routes';
+import uniteRoutes from './routes/unite.routes';
+import parametreRoutes from './routes/parametre.routes';
 
 
 
@@ -26,7 +30,11 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/races', raceRoutes);
 app.use('/api/sexes', sexeRoutes);
-app.use('/api/type-productions', typeProductionRoutes); 
+app.use('/api/type-productions', typeProductionRoutes);
+app.use('/api/phase-alimentations', phaseAlimentationRoutes);
+app.use('/api/reference-composition-aliments', referenceCompositionAlimentRoutes);
+app.use('/api/unites', uniteRoutes);
+app.use('/api/parametres', parametreRoutes); 
 
 // Route de test
 app.get('/health', async (req, res) => {

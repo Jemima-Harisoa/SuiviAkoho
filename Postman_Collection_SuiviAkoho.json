@@ -1,0 +1,465 @@
+{
+  "info": {
+    "_postman_id": "suivi-akoho-collection",
+    "name": "Suivi Akoho - API Reference",
+    "description": "Collection complète des endpoints API pour toutes les tables de référence",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Race",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/races",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "races"]
+            },
+            "description": "Récupère toutes les races"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/races/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "races", "1"]
+            },
+            "description": "Récupère une race par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cobb 500\",\n  \"descriptionJson\": {\n    \"origin\": \"USA\",\n    \"purpose\": \"Chair\",\n    \"days_to_slaughter\": 42\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/races/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "races", "create"]
+            },
+            "description": "Crée une nouvelle race"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sexe",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/sexes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "sexes"]
+            },
+            "description": "Récupère tous les sexes"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/sexes/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "sexes", "1"]
+            },
+            "description": "Récupère un sexe par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"M\",\n  \"label\": \"Mâle\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/sexes/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "sexes", "create"]
+            },
+            "description": "Crée un nouveau sexe"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Type Production",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/type-productions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "type-productions"]
+            },
+            "description": "Récupère tous les types de production"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/type-productions/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "type-productions", "1"]
+            },
+            "description": "Récupère un type de production par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CHAIR\",\n  \"label\": \"Poulet de chair\",\n  \"sexeId\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/type-productions/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "type-productions", "create"]
+            },
+            "description": "Crée un nouveau type de production"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Phase Alimentation",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/phase-alimentations",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "phase-alimentations"]
+            },
+            "description": "Récupère toutes les phases d'alimentation"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/phase-alimentations/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "phase-alimentations", "1"]
+            },
+            "description": "Récupère une phase d'alimentation par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DEMARRAGE\",\n  \"label\": \"Phase de démarrage\",\n  \"weekFrom\": 1,\n  \"weekTo\": 2,\n  \"rationMinGPerDay\": 15.5,\n  \"rationMaxGPerDay\": 20.0,\n  \"objective\": \"Croissance initiale vigoureuse\",\n  \"raceId\": null,\n  \"typeProductionId\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/phase-alimentations/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "phase-alimentations", "create"]
+            },
+            "description": "Crée une nouvelle phase d'alimentation"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reference Composition Aliment",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/reference-composition-aliments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "reference-composition-aliments"]
+            },
+            "description": "Récupère toutes les compositions d'aliments"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/reference-composition-aliments/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "reference-composition-aliments", "1"]
+            },
+            "description": "Récupère une composition d'aliment par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ingredient\": \"Maïs\",\n  \"percentMin\": 30.0,\n  \"percentMax\": 40.0,\n  \"notes\": \"Source principale d'énergie\",\n  \"raceId\": null,\n  \"typeProductionId\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/reference-composition-aliments/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "reference-composition-aliments", "create"]
+            },
+            "description": "Crée une nouvelle composition d'aliment"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Unite",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/unites",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "unites"]
+            },
+            "description": "Récupère toutes les unités"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/unites/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "unites", "1"]
+            },
+            "description": "Récupère une unité par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"KG\",\n  \"label\": \"Kilogramme\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/unites/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "unites", "create"]
+            },
+            "description": "Crée une nouvelle unité"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parametre",
+      "item": [
+        {
+          "name": "GET - Liste tous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/parametres",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "parametres"]
+            },
+            "description": "Récupère tous les paramètres"
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Détail par ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/parametres/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "parametres", "1"]
+            },
+            "description": "Récupère un paramètre par ID (remplacer 1 par l'ID souhaité)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Créer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PRIX_POULET_BASE\",\n  \"label\": \"Prix de base du poulet\",\n  \"value\": \"18000\",\n  \"effectiveDate\": \"2026-01-01\",\n  \"endDate\": null\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/parametres/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "parametres", "create"]
+            },
+            "description": "Crée un nouveau paramètre"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET - Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["health"]
+            },
+            "description": "Vérifie que le serveur et la BDD sont opérationnels"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

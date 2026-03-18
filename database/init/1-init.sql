@@ -86,6 +86,7 @@ CREATE TABLE ReferenceCompositionAliment (
     Notes NVARCHAR(250) NULL,
     RaceId INT NULL,
     TypeProductionId TINYINT NULL,
+    CreatedAt DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(), -- date debut de l'alimentation
 
     CONSTRAINT FK_ReferenceComposition_TypeProduction FOREIGN KEY (TypeProductionId)
         REFERENCES TypeProduction(TypeProductionId),
