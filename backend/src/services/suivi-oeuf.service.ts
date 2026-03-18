@@ -58,8 +58,9 @@ export async function createSuiviOeuf(data: CreateSuiviOeufDTO): Promise<SuiviOe
 }
 
 export async function updateSuiviOeuf(suiviOeufId: number, data: UpdateSuiviOeufDTO): Promise<SuiviOeuf> {
-  const suivi = await suiviOeufRepository.findByLot(suiviOeufId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi œuf non trouvé`);
+  const allSuivis = await suiviOeufRepository.findAll();
+  const suivi = allSuivis.find(s => s.suiviOeufId === suiviOeufId);
+  if (!suivi) throw new Error(`Suivi œuf non trouvé`);
   
   // Validation des données fournies
   if (data.eggsPerDay !== undefined && data.eggsPerDay < 0) {
@@ -76,8 +77,9 @@ export async function updateSuiviOeuf(suiviOeufId: number, data: UpdateSuiviOeuf
 }
 
 export async function deleteSuiviOeuf(suiviOeufId: number): Promise<void> {
-  const suivi = await suiviOeufRepository.findByLot(suiviOeufId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi œuf non trouvé`);
+  const allSuivis = await suiviOeufRepository.findAll();
+  const suivi = allSuivis.find(s => s.suiviOeufId === suiviOeufId);
+  if (!suivi) throw new Error(`Suivi œuf non trouvé`);
   
   await suiviOeufRepository.delete$(suiviOeufId);
 }

@@ -5,6 +5,8 @@ database/secrets/*
 
 # fichier volumineux backend
 backend/node_modules/*
+backend/dist/*
+
 # architecture projet
 backend/.env
 

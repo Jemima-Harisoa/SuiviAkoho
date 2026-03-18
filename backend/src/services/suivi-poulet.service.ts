@@ -67,10 +67,11 @@ export async function createSuiviPoulet(data: CreateSuiviPouletDTO): Promise<Sui
 }
 
 export async function updateSuiviPoulet(suiviPouletId: number, data: UpdateSuiviPouletDTO): Promise<SuiviPoulet> {
-  const suivi = await suiviPouletRepository.findByLot(suiviPouletId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi poulet non trouvé`);
+  // Récupérer d'abord tous les suivis pour trouver le bon (car pas de findById dans repository)
+  const allSuivis = await suiviPouletRepository.findAll();
+  const currentSuivi = allSuivis.find(s => s.suiviPouletId === suiviPouletId);
+  if (!currentSuivi) throw new Error(`Suivi poulet non trouvé`);
   
-  const currentSuivi = suivi[0];
   const lot = await lotRepository.findById(currentSuivi.lotId);
   if (!lot) throw new Error(`Lot non trouvé`);
   
@@ -109,8 +110,9 @@ export async function updateSuiviPoulet(suiviPouletId: number, data: UpdateSuivi
 }
 
 export async function deleteSuiviPoulet(suiviPouletId: number): Promise<void> {
-  const suivi = await suiviPouletRepository.findByLot(suiviPouletId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi poulet non trouvé`);
+  const allSuivis = await suiviPouletRepository.findAll();
+  const suivi = allSuivis.find(s => s.suiviPouletId === suiviPouletId);
+  if (!suivi) throw new Error(`Suivi poulet non trouvé`);
   
   await suiviPouletRepository.delete$(suiviPouletId);
 }

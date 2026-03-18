@@ -9,8 +9,9 @@ export async function getAllTraitement(): Promise<TraitementOeufs[]> {
 export async function getTraitementBySuiviOeuf(suiviOeufId: number): Promise<TraitementOeufs[]> {
   if (suiviOeufId <= 0) throw new Error('SuiviOeufId doit être positif');
   
-  const suivi = await suiviOeufRepository.findByLot(suiviOeufId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi œuf non trouvé`);
+  const allSuivis = await suiviOeufRepository.findAll();
+  const suivi = allSuivis.find(s => s.suiviOeufId === suiviOeufId);
+  if (!suivi) throw new Error(`Suivi œuf non trouvé`);
   
   return traitementOeufsRepository.findBySuiviOeuf(suiviOeufId);
 }
@@ -28,8 +29,9 @@ export async function createTraitement(data: CreateTraitementOeufsDTO): Promise<
   // Validation du suivi œuf
   if (data.suiviOeufId <= 0) throw new Error('SuiviOeufId doit être positif');
   
-  const suivi = await suiviOeufRepository.findByLot(data.suiviOeufId);
-  if (!suivi || suivi.length === 0) throw new Error(`Suivi œuf non trouvé`);
+  const allSuivis = await suiviOeufRepository.findAll();
+  const suivi = allSuivis.find(s => s.suiviOeufId === data.suiviOeufId);
+  if (!suivi) throw new Error(`Suivi œuf non trouvé`);
   
   // Validation type
   const validTypes = ['VENTE', 'INCUBATION'];
@@ -41,8 +43,8 @@ export async function createTraitement(data: CreateTraitementOeufsDTO): Promise<
   if (data.count <= 0) throw new Error('Quantité d\'œufs doit être > 0');
   
   // Vérifier qu'il y a assez d'œufs disponibles
-  if (data.count > suivi[0].eggsPerWeek) {
-    throw new Error(`Quantité insuffisante. ${suivi[0].eggsPerWeek} œufs disponibles`);
+  if (data.count > suivi.eggsPerWeek) {
+    throw new Error(`Quantité insuffisante. ${suivi.eggsPerWeek} œufs disponibles`);
   }
   
   // Validation pour VENTE
@@ -64,8 +66,10 @@ export async function createTraitement(data: CreateTraitementOeufsDTO): Promise<
 }
 
 export async function deleteTraitement(traitementId: number): Promise<void> {
-  const traitement = await traitementOeufsRepository.findAll();
-  const found = traitement.find(t => t.traitementId === traitementId);
+  if (traitementId <= 0) throw new Error('TraitementId doit être positif');
+  
+  const traitements = await traitementOeufsRepository.findAll();
+  const found = traitements.find(t => t.traitementId === traitementId);
   if (!found) throw new Error(`Traitement non trouvé`);
   
   await traitementOeufsRepository.delete$(traitementId);

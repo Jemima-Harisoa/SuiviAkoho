@@ -3,7 +3,7 @@ import * as raceRepository from "../repositories/race.repositories";
 
 export async function getAllRaces(req: Request, res: Response): Promise<void> {
     try {
-        const races = await raceRepository.findAllRacees();
+        const races = await raceRepository.findAll();
         res.json(races);
     } catch (error) {
         res.status(500).json({ message: 'Erreur serveur', error: (error as Error).message });
@@ -18,7 +18,7 @@ export async function getRaceById(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const race = await raceRepository.findRaceById(raceId);
+        const race = await raceRepository.findById(raceId);
         if (!race) {
             res.status(404).json({ message: 'Race Course non trouvée' });
         }
@@ -35,7 +35,7 @@ export async function createRace(req: Request, res: Response): Promise<void> {
             res.status(400).json({ message: 'Le nom de la race est requis' });
             return;
         }
-        const newRace = await raceRepository.createRace({ name, descriptionJson });
+        const newRace = await raceRepository.create({ name, descriptionJson });
         if (!newRace) {
             res.status(500).json({ message: 'Erreur lors de la création de la race' });
             return;
